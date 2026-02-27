@@ -1,0 +1,1669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Teacher Helper</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #111118;
+      color: #eee;
+      transition: background 0.5s ease;
+    }
+
+    body.level-green { background: #0d1a12; }
+    body.level-yellow { background: #1a1a0d; }
+    body.level-red { background: #1a0d0d; }
+
+    /* ===== TOP BAR ===== */
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 24px;
+      background: #16161e;
+      border-bottom: 1px solid #222;
+      flex-shrink: 0;
+    }
+    .top-bar-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .top-bar-logo {
+      width: 32px; height: 32px;
+      background: #2d6a4f;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem;
+    }
+    .top-bar-title { font-size: 1.05rem; font-weight: 700; }
+    .top-bar-subtitle { font-size: 0.72rem; color: #777; margin-top: 1px; }
+
+    .btn-fullscreen {
+      background: #222;
+      color: #ccc;
+      padding: 8px 18px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      border: 1px solid #333;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .btn-fullscreen:hover { background: #2a2a3a; color: #fff; border-color: #555; }
+
+    /* ===== TAB NAV ===== */
+    .tab-nav {
+      display: flex;
+      padding: 12px 24px 0;
+      gap: 0;
+    }
+    .tab-btn {
+      padding: 10px 28px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      background: transparent;
+      color: #666;
+      border-radius: 10px 10px 0 0;
+      transition: all 0.15s;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .tab-btn.active {
+      background: #1a1a24;
+      color: #fff;
+    }
+    .tab-btn:hover:not(.active) { color: #aaa; }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* ===== MONITOR TAB ===== */
+    .monitor-layout {
+      display: grid;
+      grid-template-columns: 300px 1fr 320px;
+      gap: 0;
+      padding: 0 24px 24px;
+      background: #1a1a24;
+      min-height: 420px;
+      align-items: start;
+    }
+
+    /* -- Left column -- */
+    .monitor-left {
+      padding: 24px 24px 24px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .btn-record-big {
+      width: 100%;
+      padding: 16px 24px;
+      font-size: 1rem;
+      font-weight: 700;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      background: #2d6a4f;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: all 0.2s;
+    }
+    .btn-record-big:hover:not(:disabled) { background: #3a8563; transform: translateY(-1px); }
+    .btn-record-big:disabled { cursor: not-allowed; opacity: 0.7; }
+    .btn-record-big.recording {
+      background: #e63946;
+      animation: pulse 1.5s infinite;
+    }
+    .btn-record-big .mic-icon { font-size: 1.1rem; }
+
+    .btn-stop-big {
+      width: 100%;
+      padding: 12px 24px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      background: #444;
+      color: #fff;
+      display: none;
+      margin-top: -12px;
+    }
+    .btn-stop-big.visible { display: block; }
+    .btn-stop-big:hover { background: #555; }
+
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(230,57,70,0.5); }
+      50% { box-shadow: 0 0 0 12px rgba(230,57,70,0); }
+    }
+
+    .alert-section h3 {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: #666;
+      margin-bottom: 8px;
+    }
+
+    .range-buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+    .range-btn {
+      padding: 10px 6px;
+      border: 2px solid #2a2a3a;
+      border-radius: 10px;
+      background: #16161e;
+      color: #999;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+      text-align: center;
+      line-height: 1.3;
+    }
+    .range-btn span {
+      display: block;
+      font-size: 0.68rem;
+      font-weight: 400;
+      color: #555;
+      margin-top: 2px;
+    }
+    .range-btn:hover { border-color: #555; color: #ccc; }
+    .range-btn.active {
+      border-color: #2d6a4f;
+      background: #1a2e24;
+      color: #fff;
+    }
+    .range-btn.active span { color: #69db7c; }
+
+    .more-settings {
+      margin-top: 4px;
+    }
+    .more-settings summary {
+      cursor: pointer;
+      font-size: 0.75rem;
+      color: #666;
+      user-select: none;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .more-settings summary:hover { color: #999; }
+    .more-settings-content {
+      margin-top: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .setting-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.78rem;
+    }
+    .setting-row label { color: #888; }
+    .setting-row input[type="range"] { width: 90px; accent-color: #2d6a4f; }
+    .setting-row .value-display { width: 28px; text-align: right; color: #bbb; font-variant-numeric: tabular-nums; font-size: 0.75rem; }
+
+    .sound-select-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.78rem;
+    }
+    .sound-select-row label { color: #888; }
+    .sound-select-row select {
+      background: #222;
+      color: #ccc;
+      border: 1px solid #333;
+      border-radius: 6px;
+      padding: 4px 8px;
+      font-size: 0.75rem;
+    }
+
+    .db-reference {
+      display: flex;
+      gap: 5px;
+      flex-wrap: wrap;
+    }
+    .db-ref-item {
+      font-size: 0.65rem;
+      padding: 3px 7px;
+      border-radius: 20px;
+      background: transparent;
+      color: #666;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .db-ref-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    /* -- Center column -- */
+    .monitor-center {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 30px;
+      min-height: 400px;
+    }
+
+    .level-meter {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      width: 180px;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 3px solid #2a2a3a;
+      box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4);
+      flex-shrink: 0;
+    }
+
+    .level-zone {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 18px 14px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      transition: background 0.25s ease, box-shadow 0.25s ease, color 0.25s ease;
+      color: #444;
+      position: relative;
+    }
+
+    .level-zone-veryloud {
+      background: #1a0d0d;
+      border-bottom: 1px solid #2a2a3a;
+    }
+    .level-zone-loud {
+      background: #1a1010;
+      border-bottom: 1px solid #2a2a3a;
+    }
+    .level-zone-talking {
+      background: #1a1a0d;
+      border-bottom: 1px solid #2a2a3a;
+    }
+    .level-zone-quiet {
+      background: #0d1a12;
+    }
+
+    .level-zone-veryloud.active {
+      background: #ff1a1a;
+      color: #fff;
+      box-shadow: inset 0 0 30px rgba(255,26,26,0.4);
+    }
+    .level-zone-loud.active {
+      background: #ff6b35;
+      color: #fff;
+      box-shadow: inset 0 0 30px rgba(255,107,53,0.4);
+    }
+    .level-zone-talking.active {
+      background: #ffd600;
+      color: #1a1a0d;
+      box-shadow: inset 0 0 30px rgba(255,214,0,0.3);
+    }
+    .level-zone-quiet.active {
+      background: #00e640;
+      color: #0d1a12;
+      box-shadow: inset 0 0 30px rgba(0,230,64,0.3);
+    }
+
+    .meter-bar-bg {
+      width: 120px;
+      height: 6px;
+      background: #2a2a3a;
+      border-radius: 3px;
+      overflow: hidden;
+      margin-top: 20px;
+    }
+    .meter-bar-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: 3px;
+      transition: width 0.3s ease, background 0.3s ease;
+      background: #00e640;
+    }
+
+    .volume-value {
+      margin-top: 8px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      color: #ccc;
+    }
+
+    .level-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: #666;
+      margin-top: 2px;
+    }
+
+    .buzzer-indicator {
+      display: none;
+      margin-top: 10px;
+      padding: 6px 16px;
+      background: #e63946;
+      color: white;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.8rem;
+      animation: blink 0.5s infinite;
+    }
+    .buzzer-indicator.active { display: inline-block; }
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    .status-text {
+      margin-top: 10px;
+      font-size: 0.7rem;
+      color: #555;
+      text-align: center;
+    }
+
+    /* -- Right column -- */
+    .monitor-right-panel {
+      padding: 24px 0 24px 24px;
+      border-left: 1px solid #222;
+      min-height: 100%;
+    }
+
+    .stats-panel {
+      background: #16161e;
+      border: 1px solid #2a2a3a;
+      border-radius: 14px;
+      padding: 20px;
+    }
+    .stats-panel h2 {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: #666;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+    .stat-card {
+      background: #1a1a24;
+      border-radius: 10px;
+      padding: 12px 10px;
+      text-align: center;
+    }
+    .stat-icon {
+      font-size: 0.7rem;
+      color: #555;
+      margin-bottom: 2px;
+    }
+    .stat-value {
+      font-size: 1.3rem;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+      color: #fff;
+    }
+    .stat-label {
+      font-size: 0.6rem;
+      color: #666;
+      margin-top: 2px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .noise-dist-title {
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #666;
+      margin-bottom: 10px;
+      text-align: center;
+      font-weight: 600;
+    }
+
+    .zone-bars { display: flex; flex-direction: column; gap: 6px; }
+    .zone-bar-row { display: flex; align-items: center; gap: 8px; font-size: 0.72rem; }
+    .zone-label { width: 65px; color: #888; text-align: right; flex-shrink: 0; }
+    .zone-bar-bg { flex: 1; height: 10px; background: #222; border-radius: 5px; overflow: hidden; }
+    .zone-bar-fill { height: 100%; border-radius: 5px; transition: width 0.3s ease; width: 0%; }
+    .zone-green { background: #00e640; }
+    .zone-yellow { background: #ffd600; }
+    .zone-red { background: #ff6b35; }
+    .zone-veryloud { background: #ff1a1a; }
+    .zone-percent { width: 32px; text-align: right; color: #aaa; font-variant-numeric: tabular-nums; flex-shrink: 0; }
+
+    /* ===== DATA TAB ===== */
+    .data-tab-content {
+      padding: 24px;
+      background: #1a1a24;
+    }
+
+    .chart-panel {
+      background: #16161e;
+      border: 1px solid #2a2a3a;
+      border-radius: 14px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .chart-panel h2 {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #666;
+      margin-bottom: 12px;
+    }
+    .chart-canvas-wrap canvas { width: 100%; height: 260px; border-radius: 8px; display: block; }
+    .chart-legend {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+    .legend-item { display: flex; align-items: center; gap: 5px; font-size: 0.68rem; color: #666; }
+    .legend-color { display: inline-block; width: 8px; height: 8px; border-radius: 2px; }
+
+    .data-bottom-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .event-log-panel {
+      background: #16161e;
+      border: 1px solid #2a2a3a;
+      border-radius: 14px;
+      padding: 20px;
+    }
+    .event-log-panel h2 {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #666;
+      margin-bottom: 12px;
+    }
+
+    .event-log { max-height: 200px; overflow-y: auto; font-size: 0.75rem; }
+    .event-log .no-events { color: #444; text-align: center; padding: 16px; }
+    .event-entry {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 10px;
+      background: #1a1a24;
+      border-radius: 8px;
+      margin-bottom: 4px;
+      gap: 8px;
+    }
+    .event-entry .event-time { color: #666; font-variant-numeric: tabular-nums; }
+    .event-entry .event-vol { color: #ff6b6b; font-weight: 600; }
+    .event-entry .event-quiet { color: #69db7c; font-weight: 600; }
+    .event-entry .event-pending { color: #ffd43b; font-style: italic; }
+
+    .history-panel {
+      background: #16161e;
+      border: 1px solid #2a2a3a;
+      border-radius: 14px;
+      padding: 20px;
+    }
+    .history-panel h2 {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #666;
+      margin-bottom: 12px;
+    }
+
+    .export-btns {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .btn-export {
+      background: #2d6a4f;
+      color: white;
+      padding: 8px 16px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .btn-export:hover { background: #3a8563; }
+    .btn-clear-data {
+      background: #2a2a3a;
+      color: #999;
+      padding: 8px 16px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .btn-clear-data:hover { background: #333; color: #ccc; }
+
+    .history-table { width: 100%; border-collapse: collapse; font-size: 0.72rem; }
+    .history-table th {
+      background: #1a1a24;
+      color: #666;
+      padding: 8px;
+      text-align: left;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.62rem;
+      letter-spacing: 0.5px;
+    }
+    .history-table td {
+      padding: 7px 8px;
+      border-bottom: 1px solid #222;
+      color: #aaa;
+      font-variant-numeric: tabular-nums;
+    }
+    .history-table tr:hover td { background: #1e1e28; }
+    .history-empty { text-align: center; color: #444; padding: 20px; font-size: 0.8rem; }
+
+    .btn-delete-session {
+      background: none; border: none; color: #555;
+      cursor: pointer; font-size: 0.8rem; padding: 2px 6px; border-radius: 4px;
+    }
+    .btn-delete-session:hover { color: #ff6b6b; background: rgba(255,107,107,0.1); }
+
+    /* ===== FULLSCREEN / PROJECTOR MODE ===== */
+    .fullscreen-exit-btn {
+      display: none;
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 9999;
+      background: rgba(255,255,255,0.12);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.2);
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .fullscreen-exit-btn:hover { background: rgba(255,255,255,0.2); }
+
+    body.fs-active { justify-content: center; align-items: center; padding: 0; }
+    body.fs-active .hide-fs { display: none !important; }
+    body.fs-active .fullscreen-exit-btn { display: block; }
+    body.fs-active .monitor-layout {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 0;
+    }
+    body.fs-active .monitor-left,
+    body.fs-active .monitor-right-panel { display: none; }
+    body.fs-active .monitor-center {
+      min-height: auto;
+      padding: 40px;
+    }
+    body.fs-active .level-meter {
+      width: 320px;
+      border-radius: 28px;
+    }
+    body.fs-active .level-zone {
+      padding: 36px 20px;
+      font-size: 1.4rem;
+      letter-spacing: 3px;
+    }
+    body.fs-active .meter-bar-bg { width: 200px; height: 10px; }
+    body.fs-active .volume-value { font-size: 3.5rem; margin-top: 16px; }
+    body.fs-active .level-label { font-size: 1.5rem; margin-top: 8px; }
+    body.fs-active .buzzer-indicator { font-size: 1.3rem; padding: 12px 30px; margin-top: 16px; }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 960px) {
+      .monitor-layout {
+        grid-template-columns: 1fr;
+        padding: 16px;
+      }
+      .monitor-left { padding: 0 0 16px 0; }
+      .monitor-right-panel { padding: 16px 0 0 0; border-left: none; border-top: 1px solid #222; }
+      .data-bottom-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Bar -->
+  <div class="top-bar hide-fs">
+    <div class="top-bar-left">
+      <div class="top-bar-logo">&#x1f4c8;</div>
+      <div>
+        <div class="top-bar-title">The Teacher Helper</div>
+        <div class="top-bar-subtitle">Keep the noise in the quiet zone</div>
+      </div>
+    </div>
+    <button class="btn-fullscreen" id="btnFullscreen">&#x26F6; Projector Mode</button>
+  </div>
+
+  <!-- Tab Navigation -->
+  <div class="tab-nav hide-fs">
+    <button class="tab-btn active" data-tab="monitor">&#x1f4c9; App</button>
+    <button class="tab-btn" data-tab="data">&#x1f4ca; Data</button>
+  </div>
+
+  <!-- Monitor Tab -->
+  <div class="tab-content active" id="tab-monitor">
+    <div class="monitor-layout">
+
+      <!-- Left: Controls -->
+      <div class="monitor-left hide-fs">
+        <button class="btn-record-big" id="btnRecord">
+          <span class="mic-icon">&#x1F3A4;</span> Start Recording
+        </button>
+        <button class="btn-stop-big" id="btnStop">&#x25A0; Stop Recording</button>
+
+        <div class="alert-section">
+          <h3>Alert Triggers At</h3>
+          <div class="range-buttons" id="rangeButtons">
+            <button class="range-btn" data-db="50">Quiet<span>50 dB</span></button>
+            <button class="range-btn" data-db="60">Talking<span>60 dB</span></button>
+            <button class="range-btn active" data-db="70">Loud<span>70 dB</span></button>
+            <button class="range-btn" data-db="85">Very Loud<span>85 dB</span></button>
+          </div>
+        </div>
+
+        <details class="more-settings">
+          <summary>&#x2699; More Settings</summary>
+          <div class="more-settings-content">
+            <div class="setting-row">
+              <label>After</label>
+              <input type="range" id="triggerDelay" min="0" max="10" value="2" step="1">
+              <span class="value-display" id="triggerDelayVal">2s</span>
+            </div>
+            <div class="setting-row">
+              <label>Buzzer lasts</label>
+              <input type="range" id="buzzerDuration" min="1" max="10" value="3">
+              <span class="value-display" id="buzzerDurationVal">3s</span>
+            </div>
+            <div class="sound-select-row">
+              <label>Sound</label>
+              <select id="soundType">
+                <option value="buzzer">Buzzer</option>
+                <option value="bell">Bell</option>
+                <option value="gentle">Gentle</option>
+              </select>
+            </div>
+          </div>
+        </details>
+
+        <div class="db-reference">
+          <div class="db-ref-item"><span class="db-ref-dot" style="background:#00e640"></span> &lt;50 dB Quiet</div>
+          <div class="db-ref-item"><span class="db-ref-dot" style="background:#ffd600"></span> 50-70 dB Talking</div>
+          <div class="db-ref-item"><span class="db-ref-dot" style="background:#ff6b35"></span> 70-85 dB Loud</div>
+          <div class="db-ref-item"><span class="db-ref-dot" style="background:#ff1a1a"></span> 85+ dB Very Loud</div>
+        </div>
+      </div>
+
+      <!-- Center: Level Meter -->
+      <div class="monitor-center">
+        <div class="level-meter">
+          <div class="level-zone level-zone-veryloud" id="zoneVeryLoud">Very Loud</div>
+          <div class="level-zone level-zone-loud" id="zoneLoud">Loud</div>
+          <div class="level-zone level-zone-talking" id="zoneTalking">Talking</div>
+          <div class="level-zone level-zone-quiet" id="zoneQuiet">Quiet</div>
+        </div>
+        <div class="meter-bar-bg"><div class="meter-bar-fill" id="meterFill"></div></div>
+        <div class="volume-value" id="volumeValue">--</div>
+        <div class="level-label" id="levelLabel">Ready</div>
+        <div class="buzzer-indicator" id="buzzerIndicator">BUZZER ACTIVE</div>
+        <p class="status-text" id="statusText">Click Start Recording to begin</p>
+      </div>
+
+      <!-- Right: Stats -->
+      <div class="monitor-right-panel hide-fs">
+        <div class="stats-panel">
+          <h2>Session Statistics</h2>
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-icon">&#x1F552;</div>
+              <div class="stat-value" id="statDuration">0:00</div>
+              <div class="stat-label">Duration</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon">&#x26A1;</div>
+              <div class="stat-value" id="statBuzzerCount">0</div>
+              <div class="stat-label">Alerts</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon">&#x1F4C9;</div>
+              <div class="stat-value" id="statAvgQuietDown">--</div>
+              <div class="stat-label">Avg Quiet-Down</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon">&#x1F50A;</div>
+              <div class="stat-value" id="statPeakVolume">-- dB</div>
+              <div class="stat-label">Peak Level</div>
+            </div>
+          </div>
+          <div class="noise-dist-title">Noise Distribution</div>
+          <div class="zone-bars">
+            <div class="zone-bar-row">
+              <span class="zone-label">Quiet</span>
+              <div class="zone-bar-bg"><div class="zone-bar-fill zone-green" id="zoneGreenBar"></div></div>
+              <span class="zone-percent" id="zoneGreenPct">0%</span>
+            </div>
+            <div class="zone-bar-row">
+              <span class="zone-label">Talking</span>
+              <div class="zone-bar-bg"><div class="zone-bar-fill zone-yellow" id="zoneYellowBar"></div></div>
+              <span class="zone-percent" id="zoneYellowPct">0%</span>
+            </div>
+            <div class="zone-bar-row">
+              <span class="zone-label">Loud</span>
+              <div class="zone-bar-bg"><div class="zone-bar-fill zone-red" id="zoneRedBar"></div></div>
+              <span class="zone-percent" id="zoneRedPct">0%</span>
+            </div>
+            <div class="zone-bar-row">
+              <span class="zone-label">Very Loud</span>
+              <div class="zone-bar-bg"><div class="zone-bar-fill zone-veryloud" id="zoneVeryLoudBar"></div></div>
+              <span class="zone-percent" id="zoneVeryLoudPct">0%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Data Tab -->
+  <div class="tab-content" id="tab-data">
+    <div class="data-tab-content">
+      <div class="chart-panel">
+        <h2>Noise Level Over Time</h2>
+        <div class="chart-canvas-wrap">
+          <canvas id="chartCanvas" width="1400" height="440"></canvas>
+        </div>
+        <div class="chart-legend">
+          <span class="legend-item"><span class="legend-color" style="background:#00e640"></span> Quiet</span>
+          <span class="legend-item"><span class="legend-color" style="background:#ffd600"></span> Talking</span>
+          <span class="legend-item"><span class="legend-color" style="background:#ff6b35"></span> Loud</span>
+          <span class="legend-item"><span class="legend-color" style="background:#ff1a1a"></span> Very Loud</span>
+          <span class="legend-item"><span class="legend-color" style="background:rgba(255,26,26,0.4)"></span> Buzzer</span>
+        </div>
+      </div>
+
+      <div class="data-bottom-grid">
+        <div class="event-log-panel">
+          <h2>Event Log</h2>
+          <div class="event-log" id="eventLog">
+            <p class="no-events">No events yet</p>
+          </div>
+        </div>
+        <div class="history-panel">
+          <h2>Saved Sessions</h2>
+          <div class="export-btns">
+            <button class="btn-export" id="btnExport">Export CSV</button>
+            <button class="btn-clear-data" id="btnClearData">Clear Data</button>
+          </div>
+          <div id="sessionHistory"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Fullscreen exit button -->
+  <button class="fullscreen-exit-btn" id="btnExitFs">Exit Fullscreen</button>
+
+  <script>
+    // ===== TAB SWITCHING =====
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+      });
+    });
+
+    // ===== DOM =====
+    const $ = id => document.getElementById(id);
+    const btnRecord = $('btnRecord');
+    const btnStop = $('btnStop');
+    const zoneQuiet = $('zoneQuiet');
+    const zoneTalking = $('zoneTalking');
+    const zoneLoud = $('zoneLoud');
+    const zoneVeryLoud = $('zoneVeryLoud');
+    const allZones = [zoneQuiet, zoneTalking, zoneLoud, zoneVeryLoud];
+    const meterFill = $('meterFill');
+    const volumeValue = $('volumeValue');
+    const levelLabel = $('levelLabel');
+    const buzzerIndicator = $('buzzerIndicator');
+    const statusText = $('statusText');
+    const rangeButtons = document.querySelectorAll('.range-btn');
+    const triggerDelaySlider = $('triggerDelay');
+    const triggerDelayVal = $('triggerDelayVal');
+    const buzzerDurationSlider = $('buzzerDuration');
+    const buzzerDurationVal = $('buzzerDurationVal');
+    const btnExport = $('btnExport');
+    const btnClearData = $('btnClearData');
+    const btnFullscreen = $('btnFullscreen');
+    const btnExitFs = $('btnExitFs');
+    const chartCanvas = $('chartCanvas');
+    const chartCtx = chartCanvas.getContext('2d');
+
+    // ===== STATE =====
+    let audioContext = null;
+    let analyser = null;
+    let microphone = null;
+    let stream = null;
+    let animationId = null;
+    let isRecording = false;
+
+    let buzzerActive = false;
+    let buzzerTimeout = null;
+    let activeAudio = null;
+
+    // Preload sound files (works with file:// protocol)
+    const soundFiles = {
+      buzzer: new Audio('buzzer.mp3'),
+      bell: new Audio('bell.mp3'),
+      gentle: new Audio('gentle.mp3')
+    };
+    Object.values(soundFiles).forEach(a => a.preload = 'auto');
+
+    const MIN_DB = 30;
+    const MAX_DB = 100;
+    let redThreshold = 70;        // dB
+    let yellowThreshold = 60;     // auto-calculated
+    let triggerDelaySec = 2;
+    let buzzerDurationSec = 3;
+    let redZoneStart = null;
+    let buzzerCooldownUntil = 0;    // timestamp: ignore loud readings until this time
+    const BUZZER_COOLDOWN_MS = 1500; // 1.5s grace period after buzzer stops
+
+    // Sound
+    let soundType = 'buzzer';       // 'buzzer' | 'bell' | 'gentle'
+
+    // Clean display name for sound type (handles old 'shh' data too)
+    function soundLabel(type) {
+      return { buzzer: 'buzzer', bell: 'bell', gentle: 'gentle', shh: 'gentle' }[type] || type || '';
+    }
+
+    // Data tracking
+    let dataPoints = [];
+    let buzzerEvents = [];
+    let currentBuzzerEvent = null;
+    let waitingForQuietDown = false;
+    let quietDownWatchEvent = null;
+    let sessionStartTime = null;
+    let peakVolume = MIN_DB;
+    let lastSampleTime = 0;
+    let lastZoneTime = 0;
+    let zoneTotals = { green: 0, yellow: 0, red: 0, veryloud: 0 };
+    const SAMPLE_INTERVAL = 300;
+    let smoothedVolume = MIN_DB;
+    const SMOOTH_FACTOR = 0.12;
+    let lastDisplayUpdate = 0;
+    const DISPLAY_UPDATE_INTERVAL = 200;
+
+    // ===== localStorage =====
+    const STORAGE_KEY = 'teacherHelperSessions';
+
+    function loadSaved() {
+      try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
+      catch { return []; }
+    }
+
+    function saveSessions(sessions) {
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(sessions)); }
+      catch (e) { console.warn('localStorage save failed:', e); }
+    }
+
+    function saveCurrentSession() {
+      if (!sessionStartTime) return;
+      const total = zoneTotals.green + zoneTotals.yellow + zoneTotals.red + zoneTotals.veryloud;
+      const zp = total > 0 ? {
+        green: Math.round((zoneTotals.green / total) * 100),
+        yellow: Math.round((zoneTotals.yellow / total) * 100),
+        red: Math.round((zoneTotals.red / total) * 100),
+        veryloud: Math.round((zoneTotals.veryloud / total) * 100)
+      } : { green: 0, yellow: 0, red: 0, veryloud: 0 };
+
+      const session = {
+        id: 'session-' + sessionStartTime,
+        date: new Date(sessionStartTime).toLocaleDateString(),
+        dateISO: new Date(sessionStartTime).toISOString().slice(0, 10),
+        startTime: sessionStartTime,
+        startTimeStr: new Date(sessionStartTime).toLocaleTimeString(),
+        endTime: Date.now(),
+        durationMs: Date.now() - sessionStartTime,
+        peakVolume: Math.round(peakVolume),
+        zoneTotals: { ...zoneTotals },
+        zonePercents: zp,
+        soundType,
+        buzzerEvents: buzzerEvents.map(e => ({
+          startTime: e.startTime,
+          startTimeStr: new Date(e.startTime).toLocaleTimeString(),
+          triggerVolume: e.triggerVolume,
+          endTime: e.endTime,
+          quietDownTime: e.quietDownTime
+        }))
+      };
+
+      const sessions = loadSaved();
+      sessions.push(session);
+      saveSessions(sessions);
+    }
+
+    function deleteSession(sessionId) {
+      saveSessions(loadSaved().filter(s => s.id !== sessionId));
+      renderHistory();
+    }
+
+    function clearAllData() {
+      if (!confirm('Delete all saved session data? This cannot be undone.')) return;
+      localStorage.removeItem(STORAGE_KEY);
+      renderHistory();
+    }
+
+    $('soundType').addEventListener('change', () => {
+      soundType = $('soundType').value;
+    });
+
+    // ===== FULLSCREEN =====
+    btnFullscreen.addEventListener('click', () => {
+      // Switch to monitor tab for fullscreen
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      document.querySelector('[data-tab="monitor"]').classList.add('active');
+      $('tab-monitor').classList.add('active');
+
+      const el = document.documentElement;
+      if (el.requestFullscreen) el.requestFullscreen();
+      else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+      document.body.classList.add('fs-active');
+    });
+
+    btnExitFs.addEventListener('click', exitFs);
+
+    function exitFs() {
+      if (document.fullscreenElement) document.exitFullscreen();
+      else if (document.webkitFullscreenElement) document.webkitExitFullscreen();
+      document.body.classList.remove('fs-active');
+    }
+
+    document.addEventListener('fullscreenchange', () => {
+      if (!document.fullscreenElement) document.body.classList.remove('fs-active');
+    });
+    document.addEventListener('webkitfullscreenchange', () => {
+      if (!document.webkitFullscreenElement) document.body.classList.remove('fs-active');
+    });
+
+    // ===== WARN ON PAGE REFRESH WHILE RECORDING =====
+    window.addEventListener('beforeunload', (e) => {
+      if (isRecording) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    });
+
+    // ===== SETTINGS =====
+    rangeButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (isRecording) return;
+        rangeButtons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        redThreshold = parseInt(btn.dataset.db);
+        yellowThreshold = redThreshold - 10;
+      });
+    });
+    triggerDelaySlider.addEventListener('input', () => {
+      triggerDelaySec = parseInt(triggerDelaySlider.value);
+      triggerDelayVal.textContent = triggerDelaySec + 's';
+    });
+    buzzerDurationSlider.addEventListener('input', () => {
+      buzzerDurationSec = parseInt(buzzerDurationSlider.value);
+      buzzerDurationVal.textContent = buzzerDurationSec + 's';
+    });
+
+    // ===== RECORD / STOP =====
+    btnRecord.addEventListener('click', startRecording);
+    btnStop.addEventListener('click', stopRecording);
+    btnExport.addEventListener('click', exportCSV);
+    btnClearData.addEventListener('click', clearAllData);
+
+    async function startRecording() {
+      if (isRecording) return;
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        analyser = audioContext.createAnalyser();
+        analyser.fftSize = 512;
+        analyser.smoothingTimeConstant = 0.88;
+        microphone = audioContext.createMediaStreamSource(stream);
+        microphone.connect(analyser);
+
+        isRecording = true;
+        btnRecord.disabled = true;
+        btnRecord.classList.add('recording');
+        btnRecord.innerHTML = '<span class="mic-icon">&#x1F534;</span> Recording...';
+        btnStop.classList.add('visible');
+        statusText.textContent = 'Monitoring noise — buzzer will sound when too loud';
+        rangeButtons.forEach(b => { b.style.pointerEvents = 'none'; b.style.opacity = '0.5'; });
+
+        dataPoints = [];
+        buzzerEvents = [];
+        currentBuzzerEvent = null;
+        waitingForQuietDown = false;
+        quietDownWatchEvent = null;
+        peakVolume = MIN_DB;
+        lastSampleTime = 0;
+        lastZoneTime = Date.now();
+        zoneTotals = { green: 0, yellow: 0, red: 0, veryloud: 0 };
+        sessionStartTime = Date.now();
+        smoothedVolume = MIN_DB;
+        resetEventLog();
+
+        monitorVolume();
+      } catch (err) {
+        statusText.textContent = 'Microphone access denied. Please allow mic access.';
+      }
+    }
+
+    function stopRecording() {
+      isRecording = false;
+      if (animationId) { cancelAnimationFrame(animationId); animationId = null; }
+      forceStopBuzzer();
+
+      if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+      if (audioContext) { audioContext.close(); audioContext = null; }
+
+      saveCurrentSession();
+
+      btnRecord.disabled = false;
+      btnRecord.classList.remove('recording');
+      btnRecord.innerHTML = '<span class="mic-icon">&#x1F3A4;</span> Start Recording';
+      btnStop.classList.remove('visible');
+      clearLights();
+      meterFill.style.width = '0%';
+      meterFill.style.background = '#00e640';
+      volumeValue.textContent = '--';
+      levelLabel.textContent = 'Stopped';
+      levelLabel.style.color = '#666';
+      buzzerIndicator.classList.remove('active');
+      document.body.className = document.body.classList.contains('fs-active') ? 'fs-active' : '';
+      statusText.textContent = 'Session saved. Click Start Recording to begin again.';
+      rangeButtons.forEach(b => { b.style.pointerEvents = ''; b.style.opacity = ''; });
+
+      updateStats();
+      drawChart();
+      renderHistory();
+    }
+
+    // ===== MONITOR LOOP =====
+    function monitorVolume() {
+      if (!isRecording) return;
+      const now = Date.now();
+
+      if (buzzerActive) {
+        // Mic is disconnected — just show buzzer UI, don't fake levels
+        clearLights();
+        document.body.className = (document.body.classList.contains('fs-active') ? 'fs-active ' : '') + 'level-red';
+        levelLabel.textContent = 'BUZZER';
+        levelLabel.style.color = '#e63946';
+        volumeValue.textContent = '🔔';
+        meterFill.style.width = '0%';
+
+        if (now - lastSampleTime >= SAMPLE_INTERVAL) {
+          lastSampleTime = now;
+          trackZoneTime('red', now);
+          updateStats();
+        }
+        animationId = requestAnimationFrame(monitorVolume);
+        return;
+      }
+
+      const dataArray = new Uint8Array(analyser.fftSize);
+      analyser.getByteTimeDomainData(dataArray);
+      let sum = 0;
+      for (let i = 0; i < dataArray.length; i++) {
+        const s = (dataArray[i] - 128) / 128;
+        sum += s * s;
+      }
+      const rms = Math.sqrt(sum / dataArray.length);
+      // Convert RMS to approximate dB SPL (30-100 range)
+      const rawDb = rms > 0.0001 ? Math.max(MIN_DB, Math.min(MAX_DB, 85 + 20 * Math.log10(rms))) : MIN_DB;
+      if (rawDb > peakVolume) peakVolume = rawDb;
+      smoothedVolume = smoothedVolume + SMOOTH_FACTOR * (rawDb - smoothedVolume);
+      const vol = Math.round(smoothedVolume);
+
+      if (now - lastSampleTime >= SAMPLE_INTERVAL) {
+        dataPoints.push({ time: now, volume: vol });
+        lastSampleTime = now;
+        drawChart();
+        updateStats();
+      }
+
+      updateUI(vol);
+      animationId = requestAnimationFrame(monitorVolume);
+    }
+
+    // ===== UI UPDATE =====
+    function updateUI(db) {
+      const now = Date.now();
+      const inCooldown = now < buzzerCooldownUntil;
+      const fillPct = Math.max(0, Math.min(100, ((db - MIN_DB) / (MAX_DB - MIN_DB)) * 100));
+      meterFill.style.width = fillPct + '%';
+      if (now - lastDisplayUpdate >= DISPLAY_UPDATE_INTERVAL) {
+        volumeValue.textContent = db + ' dB';
+        lastDisplayUpdate = now;
+      }
+      const percent = db;  // thresholds are now in dB
+      clearLights();
+      document.body.className = document.body.classList.contains('fs-active') ? 'fs-active' : '';
+
+      // During cooldown after buzzer, don't allow re-trigger
+      // Reset redZoneStart so trigger delay restarts fresh after cooldown
+      if (inCooldown) redZoneStart = null;
+
+      if (percent >= 85) {
+        // Very Loud zone
+        if (!inCooldown && redZoneStart === null) redZoneStart = Date.now();
+        const redDur = redZoneStart ? (Date.now() - redZoneStart) / 1000 : 0;
+
+        zoneQuiet.classList.add('active');
+        zoneTalking.classList.add('active');
+        zoneLoud.classList.add('active');
+        zoneVeryLoud.classList.add('active');
+        meterFill.style.background = '#ff1a1a';
+        document.body.classList.add('level-red');
+        trackZoneTime('veryloud', now);
+
+        if (!inCooldown && redDur >= triggerDelaySec) {
+          levelLabel.textContent = 'Very Loud!';
+          levelLabel.style.color = '#ff1a1a';
+          startBuzzer();
+        } else if (inCooldown) {
+          levelLabel.textContent = 'Cooling down...';
+          levelLabel.style.color = '#ff1a1a';
+        } else {
+          const rem = Math.ceil(triggerDelaySec - redDur);
+          levelLabel.textContent = 'Warning... ' + rem + 's';
+          levelLabel.style.color = '#ff1a1a';
+        }
+      } else if (percent >= redThreshold) {
+        // Loud zone
+        if (!inCooldown && redZoneStart === null) redZoneStart = Date.now();
+        const redDur = redZoneStart ? (Date.now() - redZoneStart) / 1000 : 0;
+
+        zoneQuiet.classList.add('active');
+        zoneTalking.classList.add('active');
+        zoneLoud.classList.add('active');
+        meterFill.style.background = '#ff6b35';
+        document.body.classList.add('level-red');
+        trackZoneTime('red', now);
+
+        if (!inCooldown && redDur >= triggerDelaySec) {
+          levelLabel.textContent = 'Loud!';
+          levelLabel.style.color = '#ff6b35';
+          startBuzzer();
+        } else if (inCooldown) {
+          levelLabel.textContent = 'Cooling down...';
+          levelLabel.style.color = '#ff6b35';
+        } else {
+          const rem = Math.ceil(triggerDelaySec - redDur);
+          levelLabel.textContent = 'Warning... ' + rem + 's';
+          levelLabel.style.color = '#ff6b35';
+        }
+      } else {
+        redZoneStart = null;
+
+        if (percent >= yellowThreshold) {
+          // Talking zone
+          zoneQuiet.classList.add('active');
+          zoneTalking.classList.add('active');
+          meterFill.style.background = '#ffd600';
+          levelLabel.textContent = 'Talking';
+          levelLabel.style.color = '#ffd600';
+          document.body.classList.add('level-yellow');
+          trackZoneTime('yellow', now);
+        } else {
+          // Quiet zone
+          zoneQuiet.classList.add('active');
+          meterFill.style.background = '#00e640';
+          levelLabel.textContent = 'Quiet';
+          levelLabel.style.color = '#00e640';
+          document.body.classList.add('level-green');
+          trackZoneTime('green', now);
+
+          // Quiet-down tracking
+          if (waitingForQuietDown && quietDownWatchEvent) {
+            quietDownWatchEvent.quietDownTime = (Date.now() - quietDownWatchEvent.endTime) / 1000;
+            waitingForQuietDown = false;
+            quietDownWatchEvent = null;
+            updateEventLog();
+          }
+        }
+      }
+    }
+
+    function clearLights() {
+      allZones.forEach(z => z.classList.remove('active'));
+    }
+
+    function trackZoneTime(zone, now) {
+      if (lastZoneTime) {
+        const d = now - lastZoneTime;
+        if (d < 1000) zoneTotals[zone] += d;
+      }
+      lastZoneTime = now;
+    }
+
+    // ===== BUZZER =====
+    function startBuzzer() {
+      if (buzzerActive) return;
+      buzzerActive = true;
+      buzzerIndicator.classList.add('active');
+
+      // Disconnect mic so buzzer sound isn't picked up
+      if (microphone) {
+        try { microphone.disconnect(analyser); } catch (e) {}
+      }
+
+      currentBuzzerEvent = {
+        startTime: Date.now(),
+        triggerVolume: Math.round(peakVolume),
+        endTime: null,
+        quietDownTime: null
+      };
+      buzzerEvents.push(currentBuzzerEvent);
+      updateEventLog();
+
+      playSound(soundType);
+
+      clearTimeout(buzzerTimeout);
+      buzzerTimeout = setTimeout(() => forceStopBuzzer(), buzzerDurationSec * 1000);
+    }
+
+    function playSound(type) {
+      const audio = soundFiles[type];
+      if (!audio) return;
+      audio.currentTime = 0;
+      audio.loop = true;
+      audio.volume = 0.8;
+      audio.play().catch(() => {});
+      activeAudio = audio;
+    }
+
+    function forceStopBuzzer() {
+      clearTimeout(buzzerTimeout);
+      buzzerTimeout = null;
+      buzzerActive = false;
+      redZoneStart = null;
+      buzzerCooldownUntil = Date.now() + BUZZER_COOLDOWN_MS;
+      buzzerIndicator.classList.remove('active');
+
+      // Reconnect mic to analyser
+      if (microphone && analyser) {
+        try { microphone.connect(analyser); } catch (e) {}
+      }
+
+      if (currentBuzzerEvent) {
+        currentBuzzerEvent.endTime = Date.now();
+        waitingForQuietDown = true;
+        quietDownWatchEvent = currentBuzzerEvent;
+        currentBuzzerEvent = null;
+        updateEventLog();
+      }
+
+      if (activeAudio) {
+        activeAudio.pause();
+        activeAudio.currentTime = 0;
+        activeAudio.loop = false;
+        activeAudio = null;
+      }
+    }
+
+    // ===== CHART =====
+    const VERYLOUD_THRESHOLD = 85;
+
+    function drawChart() {
+      const W = chartCanvas.width;
+      const H = chartCanvas.height;
+      chartCtx.clearRect(0, 0, W, H);
+
+      chartCtx.fillStyle = '#111118';
+      chartCtx.fillRect(0, 0, W, H);
+
+      // Map dB to chart Y position
+      function dbToY(db) { return H - ((db - MIN_DB) / (MAX_DB - MIN_DB)) * H; }
+      const yY = dbToY(yellowThreshold);
+      const rY = dbToY(redThreshold);
+      const vlY = dbToY(VERYLOUD_THRESHOLD);
+
+      // 4 zone background bands
+      chartCtx.fillStyle = 'rgba(0,230,64,0.06)';
+      chartCtx.fillRect(0, yY, W, H - yY);
+      chartCtx.fillStyle = 'rgba(255,214,0,0.06)';
+      chartCtx.fillRect(0, rY, W, yY - rY);
+      chartCtx.fillStyle = 'rgba(255,107,53,0.06)';
+      chartCtx.fillRect(0, vlY, W, rY - vlY);
+      chartCtx.fillStyle = 'rgba(255,26,26,0.06)';
+      chartCtx.fillRect(0, 0, W, vlY);
+
+      // Threshold lines with friendly labels
+      chartCtx.setLineDash([8, 6]);
+      chartCtx.lineWidth = 2;
+      chartCtx.font = '20px sans-serif';
+
+      chartCtx.strokeStyle = 'rgba(255,214,0,0.4)';
+      chartCtx.beginPath(); chartCtx.moveTo(0, yY); chartCtx.lineTo(W, yY); chartCtx.stroke();
+      chartCtx.fillStyle = 'rgba(255,214,0,0.5)';
+      chartCtx.fillText('Talking (' + yellowThreshold + ' dB)', 8, yY - 6);
+
+      chartCtx.strokeStyle = 'rgba(255,107,53,0.4)';
+      chartCtx.beginPath(); chartCtx.moveTo(0, rY); chartCtx.lineTo(W, rY); chartCtx.stroke();
+      chartCtx.fillStyle = 'rgba(255,107,53,0.5)';
+      chartCtx.fillText('Loud (' + redThreshold + ' dB)', 8, rY - 6);
+
+      chartCtx.strokeStyle = 'rgba(255,26,26,0.4)';
+      chartCtx.beginPath(); chartCtx.moveTo(0, vlY); chartCtx.lineTo(W, vlY); chartCtx.stroke();
+      chartCtx.fillStyle = 'rgba(255,26,26,0.5)';
+      chartCtx.fillText('Very Loud (85 dB)', 8, vlY - 6);
+      chartCtx.setLineDash([]);
+
+      if (dataPoints.length < 2) {
+        chartCtx.fillStyle = '#444';
+        chartCtx.font = '28px sans-serif';
+        chartCtx.textAlign = 'center';
+        chartCtx.fillText('Start recording to see data', W / 2, H / 2);
+        chartCtx.textAlign = 'start';
+        return;
+      }
+
+      // Auto-scale X-axis to fit ALL data
+      const firstTime = dataPoints[0].time;
+      const lastTime = dataPoints[dataPoints.length - 1].time;
+      const timeSpan = Math.max(lastTime - firstTime, 10000); // min 10s window
+
+      // Buzzer event regions
+      for (const evt of buzzerEvents) {
+        const endT = evt.endTime || lastTime;
+        const x1 = Math.max(0, ((evt.startTime - firstTime) / timeSpan) * W);
+        const x2 = Math.min(W, ((endT - firstTime) / timeSpan) * W);
+        if (x2 > 0 && x1 < W) {
+          chartCtx.fillStyle = 'rgba(255,26,26,0.18)';
+          chartCtx.fillRect(x1, 0, Math.max(x2 - x1, 3), H);
+          chartCtx.fillStyle = 'rgba(255,100,100,0.7)';
+          chartCtx.font = 'bold 18px sans-serif';
+          chartCtx.fillText('BUZZ', x1 + 4, 22);
+        }
+      }
+
+      // Volume line with 4 zone colors
+      for (let i = 1; i < dataPoints.length; i++) {
+        const prev = dataPoints[i - 1];
+        const curr = dataPoints[i];
+        const x1 = ((prev.time - firstTime) / timeSpan) * W;
+        const x2 = ((curr.time - firstTime) / timeSpan) * W;
+        const y1 = dbToY(prev.volume);
+        const y2 = dbToY(curr.volume);
+
+        chartCtx.strokeStyle = curr.volume >= 85 ? '#ff1a1a'
+          : curr.volume >= redThreshold ? '#ff6b35'
+          : curr.volume >= yellowThreshold ? '#ffd600' : '#00e640';
+        chartCtx.lineWidth = 3;
+        chartCtx.beginPath(); chartCtx.moveTo(x1, y1); chartCtx.lineTo(x2, y2); chartCtx.stroke();
+      }
+
+      // Y-axis dB labels with friendly names at zone boundaries
+      chartCtx.font = '18px sans-serif';
+      chartCtx.textAlign = 'right';
+      for (let d = MIN_DB; d <= MAX_DB; d += 10) {
+        const y = dbToY(d);
+        let label = d + ' dB';
+        let color = '#555';
+        if (d === yellowThreshold) { label = 'Talking (' + d + ' dB)'; color = 'rgba(255,214,0,0.6)'; }
+        else if (d === redThreshold) { label = 'Loud (' + d + ' dB)'; color = 'rgba(255,107,53,0.6)'; }
+        else if (d === VERYLOUD_THRESHOLD) { label = 'V. Loud (' + d + ' dB)'; color = 'rgba(255,26,26,0.6)'; }
+        chartCtx.fillStyle = color;
+        chartCtx.fillText(label, W - 8, y + 5);
+        if (d > MIN_DB && d < MAX_DB) {
+          chartCtx.strokeStyle = 'rgba(100,100,100,0.12)';
+          chartCtx.lineWidth = 1;
+          chartCtx.setLineDash([3, 5]);
+          chartCtx.beginPath(); chartCtx.moveTo(0, y); chartCtx.lineTo(W - 60, y); chartCtx.stroke();
+          chartCtx.setLineDash([]);
+        }
+      }
+
+      // X-axis time labels (actual clock time)
+      chartCtx.fillStyle = '#444';
+      chartCtx.font = '20px sans-serif';
+      chartCtx.textAlign = 'center';
+      const totalSecs = Math.ceil(timeSpan / 1000);
+      // Pick nice intervals based on duration
+      let interval;
+      if (totalSecs <= 60) interval = 10;
+      else if (totalSecs <= 180) interval = 30;
+      else if (totalSecs <= 600) interval = 60;
+      else if (totalSecs <= 1200) interval = 120;
+      else if (totalSecs <= 3600) interval = 300;
+      else interval = 600;
+
+      // Round firstTime up to next interval boundary
+      const startSec = Math.ceil((firstTime / 1000) / interval) * interval;
+      for (let ts = startSec * 1000; ts <= lastTime; ts += interval * 1000) {
+        const x = ((ts - firstTime) / timeSpan) * W;
+        if (x < 10 || x > W - 10) continue;
+        const d = new Date(ts);
+        let h = d.getHours();
+        const m = d.getMinutes();
+        const s = d.getSeconds();
+        const ampm = h >= 12 ? 'pm' : 'am';
+        h = h % 12 || 12;
+        let label;
+        if (interval < 60) {
+          label = h + ':' + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0') + ' ' + ampm;
+        } else {
+          label = h + ':' + String(m).padStart(2, '0') + ' ' + ampm;
+        }
+        chartCtx.fillText(label, x, H - 6);
+      }
+      chartCtx.textAlign = 'start';
+    }
+
+    // ===== STATS =====
+    function updateStats() {
+      if (sessionStartTime) {
+        const el = Date.now() - sessionStartTime;
+        const m = Math.floor(el / 60000);
+        const s = Math.floor((el % 60000) / 1000);
+        $('statDuration').textContent = m + ':' + String(s).padStart(2, '0');
+      }
+
+      $('statBuzzerCount').textContent = buzzerEvents.length;
+
+      const completed = buzzerEvents.filter(e => e.quietDownTime !== null);
+      if (completed.length > 0) {
+        const avg = completed.reduce((s, e) => s + e.quietDownTime, 0) / completed.length;
+        $('statAvgQuietDown').textContent = avg.toFixed(1) + 's';
+      } else {
+        $('statAvgQuietDown').textContent = '--';
+      }
+
+      $('statPeakVolume').textContent = Math.round(peakVolume) + ' dB';
+
+      const total = zoneTotals.green + zoneTotals.yellow + zoneTotals.red + zoneTotals.veryloud;
+      if (total > 0) {
+        const gP = Math.round((zoneTotals.green / total) * 100);
+        const yP = Math.round((zoneTotals.yellow / total) * 100);
+        const rP = Math.round((zoneTotals.red / total) * 100);
+        const vlP = Math.round((zoneTotals.veryloud / total) * 100);
+        $('zoneGreenBar').style.width = gP + '%';
+        $('zoneYellowBar').style.width = yP + '%';
+        $('zoneRedBar').style.width = rP + '%';
+        $('zoneVeryLoudBar').style.width = vlP + '%';
+        $('zoneGreenPct').textContent = gP + '%';
+        $('zoneYellowPct').textContent = yP + '%';
+        $('zoneRedPct').textContent = rP + '%';
+        $('zoneVeryLoudPct').textContent = vlP + '%';
+      }
+    }
+
+    // ===== EVENT LOG =====
+    function resetEventLog() {
+      $('eventLog').innerHTML = '<p class="no-events">No events yet</p>';
+    }
+
+    function updateEventLog() {
+      const log = $('eventLog');
+
+      if (buzzerEvents.length === 0) {
+        log.innerHTML = '<p class="no-events">No events yet</p>';
+        return;
+      }
+
+      let html = '';
+      for (const evt of buzzerEvents.slice().reverse()) {
+        const time = new Date(evt.startTime).toLocaleTimeString();
+        const vol = Math.round(evt.triggerVolume) + ' dB';
+
+        let result;
+        if (evt.quietDownTime !== null) {
+          result = `<span class="event-quiet">${evt.quietDownTime.toFixed(1)}s</span>`;
+        } else if (evt.endTime) {
+          result = '<span class="event-pending">waiting...</span>';
+        } else {
+          result = '<span class="event-pending">buzzing...</span>';
+        }
+
+        html += `<div class="event-entry">
+          <span class="event-time">${time}</span>
+          <span class="event-vol">${vol}</span>
+          ${result}
+        </div>`;
+      }
+      log.innerHTML = html;
+    }
+
+    // ===== HISTORY TABLE =====
+    function renderHistory() {
+      const container = $('sessionHistory');
+      const sessions = loadSaved();
+
+      if (sessions.length === 0) {
+        container.innerHTML = '<p class="history-empty">No saved sessions yet.</p>';
+        return;
+      }
+
+      let html = `<table class="history-table"><thead><tr>
+        <th>Date</th><th>Start</th><th>Sound</th><th>Duration</th>
+        <th>Buzzers</th><th>Avg Quiet-Down</th><th>Peak dB</th>
+        <th>Quiet</th><th>Talking</th><th>Loud</th><th>V. Loud</th><th></th>
+      </tr></thead><tbody>`;
+
+      for (const s of sessions.slice().reverse()) {
+        const m = Math.floor(s.durationMs / 60000);
+        const sec = Math.floor((s.durationMs % 60000) / 1000);
+        const dur = m + ':' + String(sec).padStart(2, '0');
+        const evts = s.buzzerEvents || [];
+        const completed = evts.filter(e => e.quietDownTime !== null);
+        const avgR = completed.length > 0
+          ? (completed.reduce((sum, e) => sum + e.quietDownTime, 0) / completed.length).toFixed(1) + 's'
+          : '--';
+        const zp = s.zonePercents || { green: 0, yellow: 0, red: 0, veryloud: 0 };
+        const sound = soundLabel(s.soundType || 'buzzer');
+
+        html += `<tr>
+          <td>${s.date}</td><td>${s.startTimeStr}</td>
+          <td>${sound}</td><td>${dur}</td>
+          <td>${evts.length}</td><td>${avgR}</td><td>${Math.round(s.peakVolume)} dB</td>
+          <td>${zp.green}%</td><td>${zp.yellow}%</td><td>${zp.red}%</td><td>${zp.veryloud || 0}%</td>
+          <td><button class="btn-delete-session" onclick="deleteSession('${s.id}')" title="Delete">&#x2715;</button></td>
+        </tr>`;
+      }
+
+      html += '</tbody></table>';
+      container.innerHTML = html;
+    }
+
+    // ===== CSV EXPORT =====
+    function exportCSV() {
+      const sessions = loadSaved();
+      if (sessions.length === 0) { alert('No saved data to export.'); return; }
+
+      let csv = 'SESSION SUMMARY\n';
+      csv += 'Date,Start Time,Sound,Duration (min),Buzzers,Avg Quiet-Down (s),Peak dB,Quiet %,Talking %,Loud %,Very Loud %\n';
+
+      for (const s of sessions) {
+        const dur = (s.durationMs / 60000).toFixed(1);
+        const evts = s.buzzerEvents || [];
+        const completed = evts.filter(e => e.quietDownTime !== null);
+        const avgR = completed.length > 0
+          ? (completed.reduce((sum, e) => sum + e.quietDownTime, 0) / completed.length).toFixed(1)
+          : '';
+        const zp = s.zonePercents || { green: 0, yellow: 0, red: 0, veryloud: 0 };
+        csv += `${s.date},${s.startTimeStr},${soundLabel(s.soundType)},${dur},${evts.length},${avgR},${Math.round(s.peakVolume)},${zp.green},${zp.yellow},${zp.red},${zp.veryloud || 0}\n`;
+      }
+
+      csv += '\nEVENT DETAILS\n';
+      csv += 'Date,Session Start,Sound,Event #,Event Time,Trigger Level (dB),Quiet-Down Time (s)\n';
+
+      for (const s of sessions) {
+        const evts = s.buzzerEvents || [];
+        if (evts.length === 0) {
+          csv += `${s.date},${s.startTimeStr},${soundLabel(s.soundType)},0,--,--,-- (no events)\n`;
+        } else {
+          evts.forEach((e, i) => {
+            const tStr = e.quietDownTime !== null && e.quietDownTime !== undefined ? e.quietDownTime.toFixed(1) : 'N/A';
+            csv += `${s.date},${s.startTimeStr},${soundLabel(s.soundType)},${i + 1},${e.startTimeStr},${e.triggerVolume},${tStr}\n`;
+          });
+        }
+      }
+
+      const today = new Date().toISOString().slice(0, 10);
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `noise-monitor-${today}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    // ===== INIT =====
+    drawChart();
+    renderHistory();
+  </script>
+</body>
+</html>
