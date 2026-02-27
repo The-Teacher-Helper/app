@@ -682,6 +682,27 @@
       margin-bottom: 6px;
     }
 
+    .about-ai-note {
+      background: #1a1a24;
+      border: 1px solid #2a2a3a;
+      border-radius: 10px;
+      padding: 14px 18px;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-top: 4px;
+    }
+    .about-ai-icon {
+      font-size: 1.3rem;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .about-ai-note p {
+      font-size: 0.82rem !important;
+      color: #888 !important;
+      line-height: 1.55;
+    }
+
     .about-start-btn {
       margin-top: 28px;
       background: #2d6a4f;
@@ -794,6 +815,10 @@
           <p>The Teacher Helper listens to the noise level in the room. It does not record anyone. It only checks how loud the room is.</p>
           <p>If we get too loud, it makes a buzz sound. The buzz reminds us to use quiet voices.</p>
           <p>We built The Teacher Helper to see if the buzz would help students talk quieter and keep our class calm.</p>
+          <div class="about-ai-note">
+            <span class="about-ai-icon">&#x1f916;</span>
+            <p>We're not experts in coding, but we used AI to help us code this app to test our hypothesis. Along the way, we also learned a lot about how AI can help us build things.</p>
+          </div>
         </div>
         <button class="about-start-btn" id="btnGoToApp">Get Started &#x2192;</button>
       </div>
