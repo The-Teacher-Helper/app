@@ -574,6 +574,7 @@
     }
     .btn-clear-data:hover { background: #333; color: #ccc; }
 
+    .history-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
     .history-table { width: 100%; border-collapse: collapse; font-size: 0.72rem; }
     .history-table th {
       background: #1a1a24;
@@ -584,12 +585,14 @@
       text-transform: uppercase;
       font-size: 0.62rem;
       letter-spacing: 0.5px;
+      white-space: nowrap;
     }
     .history-table td {
       padding: 7px 8px;
       border-bottom: 1px solid #222;
       color: #aaa;
       font-variant-numeric: tabular-nums;
+      white-space: nowrap;
     }
     .history-table tr:hover td { background: #1e1e28; }
     .history-empty { text-align: center; color: #444; padding: 20px; font-size: 0.8rem; }
@@ -599,6 +602,79 @@
       cursor: pointer; font-size: 0.8rem; padding: 2px 6px; border-radius: 4px;
     }
     .btn-delete-session:hover { color: #ff6b6b; background: rgba(255,107,107,0.1); }
+
+    /* Mobile card layout for history */
+    .history-cards { display: none; }
+    .history-card {
+      background: #1a1a24;
+      border: 1px solid #2a2a3a;
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-bottom: 10px;
+      position: relative;
+    }
+    .history-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .history-card-date {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #ddd;
+    }
+    .history-card-time {
+      font-size: 0.72rem;
+      color: #666;
+      margin-left: 8px;
+      font-weight: 400;
+    }
+    .history-card-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .history-card-stat {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .history-card-stat-label {
+      font-size: 0.6rem;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .history-card-stat-value {
+      font-size: 0.82rem;
+      color: #bbb;
+      font-variant-numeric: tabular-nums;
+      font-weight: 600;
+    }
+    .history-card-zones {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid #2a2a3a;
+      flex-wrap: wrap;
+    }
+    .history-card-zone {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.68rem;
+      color: #888;
+    }
+    .history-card-zone-dot {
+      width: 8px; height: 8px; border-radius: 50%; display: inline-block;
+    }
+    .history-card .btn-delete-session {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+    }
 
     /* ===== ABOUT PAGE ===== */
     .about-page {
@@ -774,6 +850,27 @@
       .monitor-left { padding: 0 0 16px 0; }
       .monitor-right-panel { padding: 16px 0 0 0; border-left: none; border-top: 1px solid #222; }
       .data-bottom-grid { grid-template-columns: 1fr; }
+      .data-tab-content { padding: 16px; }
+    }
+
+    @media (max-width: 640px) {
+      .top-bar { padding: 10px 14px; }
+      .top-bar-title { font-size: 0.92rem; }
+      .btn-fullscreen { padding: 6px 12px; font-size: 0.72rem; }
+      .tab-btn { padding: 8px 16px; font-size: 0.75rem; }
+      .about-card { padding: 28px 20px; }
+      .about-title { font-size: 1.3rem; }
+      .data-tab-content { padding: 12px; }
+      .chart-panel { padding: 14px; }
+      .event-log-panel { padding: 14px; }
+      .history-panel { padding: 14px; }
+      .export-btns { flex-wrap: wrap; }
+      .event-entry { flex-wrap: wrap; font-size: 0.7rem; }
+      .monitor-center { padding: 20px 10px; }
+
+      /* Hide table, show cards on mobile */
+      .history-table-wrap { display: none; }
+      .history-cards { display: block; }
     }
   </style>
 </head>
@@ -813,7 +910,7 @@
             If students hear a buzz when they get too loud, will they lower their voices?
           </div>
           <p>The Teacher Helper listens to the noise level in the room. It does not record anyone. It only checks how loud the room is.</p>
-          <p>If we get too loud, it makes a buzz sound. The buzz reminds us to use quiet voices.</p>
+          <p>If we get too loud, it makes a buzz sound. The buzz reminds us to use quiet voices (well, we'll find out).</p>
           <p>We built The Teacher Helper to see if the buzz would help students talk quieter and keep our class calm.</p>
           <div class="about-ai-note">
             <span class="about-ai-icon">&#x1f916;</span>
@@ -1737,11 +1834,15 @@
         return;
       }
 
-      let html = `<table class="history-table"><thead><tr>
+      // Build table (desktop) wrapped for horizontal scroll
+      let tableHtml = `<div class="history-table-wrap"><table class="history-table"><thead><tr>
         <th>Date</th><th>Start</th><th>Sound</th><th>Duration</th>
         <th>Buzzers</th><th>Avg Quiet-Down</th><th>Peak dB</th>
         <th>Quiet</th><th>Talking</th><th>Loud</th><th>V. Loud</th><th></th>
       </tr></thead><tbody>`;
+
+      // Build cards (mobile)
+      let cardsHtml = '<div class="history-cards">';
 
       for (const s of sessions.slice().reverse()) {
         const m = Math.floor(s.durationMs / 60000);
@@ -1755,17 +1856,55 @@
         const zp = s.zonePercents || { green: 0, yellow: 0, red: 0, veryloud: 0 };
         const sound = soundLabel(s.soundType || 'buzzer');
 
-        html += `<tr>
+        // Table row
+        tableHtml += `<tr>
           <td>${s.date}</td><td>${s.startTimeStr}</td>
           <td>${sound}</td><td>${dur}</td>
           <td>${evts.length}</td><td>${avgR}</td><td>${Math.round(s.peakVolume)} dB</td>
           <td>${zp.green}%</td><td>${zp.yellow}%</td><td>${zp.red}%</td><td>${zp.veryloud || 0}%</td>
           <td><button class="btn-delete-session" onclick="deleteSession('${s.id}')" title="Delete">&#x2715;</button></td>
         </tr>`;
+
+        // Mobile card
+        cardsHtml += `<div class="history-card">
+          <button class="btn-delete-session" onclick="deleteSession('${s.id}')" title="Delete">&#x2715;</button>
+          <div class="history-card-header">
+            <span class="history-card-date">${s.date}<span class="history-card-time">${s.startTimeStr}</span></span>
+          </div>
+          <div class="history-card-grid">
+            <div class="history-card-stat">
+              <span class="history-card-stat-label">Duration</span>
+              <span class="history-card-stat-value">${dur}</span>
+            </div>
+            <div class="history-card-stat">
+              <span class="history-card-stat-label">Sound</span>
+              <span class="history-card-stat-value">${sound}</span>
+            </div>
+            <div class="history-card-stat">
+              <span class="history-card-stat-label">Buzzers</span>
+              <span class="history-card-stat-value">${evts.length}</span>
+            </div>
+            <div class="history-card-stat">
+              <span class="history-card-stat-label">Avg Quiet-Down</span>
+              <span class="history-card-stat-value">${avgR}</span>
+            </div>
+            <div class="history-card-stat">
+              <span class="history-card-stat-label">Peak</span>
+              <span class="history-card-stat-value">${Math.round(s.peakVolume)} dB</span>
+            </div>
+          </div>
+          <div class="history-card-zones">
+            <span class="history-card-zone"><span class="history-card-zone-dot" style="background:#00e640"></span> ${zp.green}%</span>
+            <span class="history-card-zone"><span class="history-card-zone-dot" style="background:#ffd600"></span> ${zp.yellow}%</span>
+            <span class="history-card-zone"><span class="history-card-zone-dot" style="background:#ff6b35"></span> ${zp.red}%</span>
+            <span class="history-card-zone"><span class="history-card-zone-dot" style="background:#ff1a1a"></span> ${zp.veryloud || 0}%</span>
+          </div>
+        </div>`;
       }
 
-      html += '</tbody></table>';
-      container.innerHTML = html;
+      tableHtml += '</tbody></table></div>';
+      cardsHtml += '</div>';
+      container.innerHTML = tableHtml + cardsHtml;
     }
 
     // ===== CSV EXPORT =====
