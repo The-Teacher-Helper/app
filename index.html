@@ -5,6 +5,84 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>The Teacher Helper</title>
   <style>
+    :root {
+      --bg-body: #111118;
+      --bg-surface: #16161e;
+      --bg-surface-alt: #1a1a24;
+      --bg-input: #222;
+      --text-primary: #eee;
+      --text-secondary: #aaa;
+      --text-muted: #666;
+      --text-dim: #444;
+      --text-on-surface: #ccc;
+      --text-on-surface-alt: #bbb;
+      --text-bright: #fff;
+      --text-subtitle: #777;
+      --text-setting: #888;
+      --text-setting-alt: #999;
+      --border-primary: #222;
+      --border-secondary: #2a2a3a;
+      --border-tertiary: #333;
+      --accent: #2d6a4f;
+      --accent-hover: #3a8563;
+      --accent-bg: #1a2e24;
+      --accent-text: #69db7c;
+      --bg-level-green: #0d1a12;
+      --bg-level-yellow: #1a1a0d;
+      --bg-level-red: #1a0d0d;
+      --bg-zone-veryloud: #1a0d0d;
+      --bg-zone-loud: #1a1010;
+      --bg-zone-talking: #1a1a0d;
+      --bg-zone-quiet: #0d1a12;
+      --bg-btn-stop: #444;
+      --bg-btn-stop-hover: #555;
+      --bg-btn-clear: #2a2a3a;
+      --bg-btn-clear-hover: #333;
+      --bg-hover-row: #1e1e28;
+      --chart-zone-alpha: 0.06;
+      --chart-buzzer-alpha: 0.18;
+      --shadow-meter: rgba(0, 0, 0, 0.4);
+    }
+
+    body.light-mode {
+      --bg-body: #f0f0f5;
+      --bg-surface: #ffffff;
+      --bg-surface-alt: #f5f5fa;
+      --bg-input: #e8e8ee;
+      --text-primary: #1a1a2e;
+      --text-secondary: #555;
+      --text-muted: #777;
+      --text-dim: #999;
+      --text-on-surface: #333;
+      --text-on-surface-alt: #444;
+      --text-bright: #111;
+      --text-subtitle: #666;
+      --text-setting: #555;
+      --text-setting-alt: #666;
+      --border-primary: #ddd;
+      --border-secondary: #ccc;
+      --border-tertiary: #bbb;
+      --accent: #2d6a4f;
+      --accent-hover: #3a8563;
+      --accent-bg: #e6f5ec;
+      --accent-text: #1a7a3a;
+      --bg-level-green: #e6f9ec;
+      --bg-level-yellow: #fdf9e6;
+      --bg-level-red: #fde8e8;
+      --bg-zone-veryloud: #fde8e8;
+      --bg-zone-loud: #fdeceb;
+      --bg-zone-talking: #fdf9e6;
+      --bg-zone-quiet: #e6f9ec;
+      --bg-btn-stop: #bbb;
+      --bg-btn-stop-hover: #999;
+      --bg-btn-clear: #ddd;
+      --bg-btn-clear-hover: #ccc;
+      --bg-hover-row: #eeeef5;
+      --chart-zone-alpha: 0.12;
+      --chart-buzzer-alpha: 0.12;
+      --shadow-meter: rgba(0, 0, 0, 0.12);
+    }
+
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
@@ -12,14 +90,14 @@
       display: flex;
       flex-direction: column;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: #111118;
-      color: #eee;
+      background: var(--bg-body);
+      color: var(--text-primary);
       transition: background 0.5s ease;
     }
 
-    body.level-green { background: #0d1a12; }
-    body.level-yellow { background: #1a1a0d; }
-    body.level-red { background: #1a0d0d; }
+    body.level-green { background: var(--bg-level-green); }
+    body.level-yellow { background: var(--bg-level-yellow); }
+    body.level-red { background: var(--bg-level-red); }
 
     /* ===== TOP BAR ===== */
     .top-bar {
@@ -27,8 +105,8 @@
       align-items: center;
       justify-content: space-between;
       padding: 14px 24px;
-      background: #16161e;
-      border-bottom: 1px solid #222;
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border-primary);
       flex-shrink: 0;
     }
     .top-bar-left {
@@ -38,27 +116,56 @@
     }
     .top-bar-logo {
       width: 32px; height: 32px;
-      background: #2d6a4f;
+      background: var(--accent);
       border-radius: 8px;
       display: flex; align-items: center; justify-content: center;
       font-size: 1rem;
     }
     .top-bar-title { font-size: 1.05rem; font-weight: 700; }
-    .top-bar-subtitle { font-size: 0.72rem; color: #777; margin-top: 1px; }
+    .top-bar-subtitle { font-size: 0.72rem; color: var(--text-subtitle); margin-top: 1px; }
+
+    .top-bar-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-theme-toggle {
+      background: var(--bg-input);
+      color: var(--text-on-surface);
+      padding: 8px 14px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      border: 1px solid var(--border-tertiary);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex; align-items: center; gap: 4px;
+      position: relative;
+      width: 38px; height: 36px;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .btn-theme-toggle:hover { background: var(--border-secondary); color: var(--text-bright); border-color: #555; }
+    .btn-theme-toggle .icon-moon,
+    .btn-theme-toggle .icon-sun { position: absolute; transition: opacity 0.2s; }
+    .btn-theme-toggle .icon-sun { opacity: 0; }
+    body.light-mode .btn-theme-toggle .icon-moon { opacity: 0; }
+    body.light-mode .btn-theme-toggle .icon-sun { opacity: 1; }
 
     .btn-fullscreen {
-      background: #222;
-      color: #ccc;
+      background: var(--bg-input);
+      color: var(--text-on-surface);
       padding: 8px 18px;
       font-size: 0.78rem;
       font-weight: 600;
-      border: 1px solid #333;
+      border: 1px solid var(--border-tertiary);
       border-radius: 8px;
       cursor: pointer;
       transition: all 0.2s;
       display: flex; align-items: center; gap: 6px;
     }
-    .btn-fullscreen:hover { background: #2a2a3a; color: #fff; border-color: #555; }
+    .btn-fullscreen:hover { background: var(--border-secondary); color: var(--text-bright); border-color: #555; }
 
     /* ===== TAB NAV ===== */
     .tab-nav {
@@ -73,16 +180,16 @@
       border: none;
       cursor: pointer;
       background: transparent;
-      color: #666;
+      color: var(--text-muted);
       border-radius: 10px 10px 0 0;
       transition: all 0.15s;
       display: flex; align-items: center; gap: 6px;
     }
     .tab-btn.active {
-      background: #1a1a24;
-      color: #fff;
+      background: var(--bg-surface-alt);
+      color: var(--text-bright);
     }
-    .tab-btn:hover:not(.active) { color: #aaa; }
+    .tab-btn:hover:not(.active) { color: var(--text-secondary); }
 
     .tab-content { display: none; }
     .tab-content.active { display: block; }
@@ -93,7 +200,7 @@
       grid-template-columns: 300px 1fr 320px;
       gap: 0;
       padding: 0 24px 24px;
-      background: #1a1a24;
+      background: var(--bg-surface-alt);
       min-height: 420px;
       align-items: start;
     }
@@ -114,7 +221,7 @@
       border: none;
       border-radius: 12px;
       cursor: pointer;
-      background: #2d6a4f;
+      background: var(--accent);
       color: white;
       display: flex;
       align-items: center;
@@ -122,7 +229,7 @@
       gap: 10px;
       transition: all 0.2s;
     }
-    .btn-record-big:hover:not(:disabled) { background: #3a8563; transform: translateY(-1px); }
+    .btn-record-big:hover:not(:disabled) { background: var(--accent-hover); transform: translateY(-1px); }
     .btn-record-big:disabled { cursor: not-allowed; opacity: 0.7; }
     .btn-record-big.recording {
       background: #e63946;
@@ -138,13 +245,13 @@
       border: none;
       border-radius: 10px;
       cursor: pointer;
-      background: #444;
-      color: #fff;
+      background: var(--bg-btn-stop);
+      color: var(--text-bright);
       display: none;
       margin-top: -12px;
     }
     .btn-stop-big.visible { display: block; }
-    .btn-stop-big:hover { background: #555; }
+    .btn-stop-big:hover { background: var(--bg-btn-stop-hover); }
 
     @keyframes pulse {
       0%, 100% { box-shadow: 0 0 0 0 rgba(230,57,70,0.5); }
@@ -155,7 +262,7 @@
       font-size: 0.72rem;
       text-transform: uppercase;
       letter-spacing: 1.5px;
-      color: #666;
+      color: var(--text-muted);
       margin-bottom: 8px;
     }
 
@@ -166,10 +273,10 @@
     }
     .range-btn {
       padding: 10px 6px;
-      border: 2px solid #2a2a3a;
+      border: 2px solid var(--border-secondary);
       border-radius: 10px;
-      background: #16161e;
-      color: #999;
+      background: var(--bg-surface);
+      color: var(--text-setting-alt);
       font-size: 0.82rem;
       font-weight: 600;
       cursor: pointer;
@@ -181,30 +288,27 @@
       display: block;
       font-size: 0.68rem;
       font-weight: 400;
-      color: #555;
+      color: var(--text-dim);
       margin-top: 2px;
     }
-    .range-btn:hover { border-color: #555; color: #ccc; }
+    .range-btn:hover { border-color: #555; color: var(--text-on-surface); }
     .range-btn.active {
-      border-color: #2d6a4f;
-      background: #1a2e24;
-      color: #fff;
+      border-color: var(--accent);
+      background: var(--accent-bg);
+      color: var(--text-bright);
     }
-    .range-btn.active span { color: #69db7c; }
+    .range-btn.active span { color: var(--accent-text); }
 
     .more-settings {
-      margin-top: 4px;
+      margin-top: 12px;
     }
-    .more-settings summary {
-      cursor: pointer;
-      font-size: 0.75rem;
-      color: #666;
-      user-select: none;
-      display: flex;
-      align-items: center;
-      gap: 6px;
+    .more-settings h3 {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
     }
-    .more-settings summary:hover { color: #999; }
     .more-settings-content {
       margin-top: 10px;
       display: flex;
@@ -218,9 +322,9 @@
       align-items: center;
       font-size: 0.78rem;
     }
-    .setting-row label { color: #888; }
-    .setting-row input[type="range"] { width: 90px; accent-color: #2d6a4f; }
-    .setting-row .value-display { width: 28px; text-align: right; color: #bbb; font-variant-numeric: tabular-nums; font-size: 0.75rem; }
+    .setting-row label { color: var(--text-setting); }
+    .setting-row input[type="range"] { width: 90px; accent-color: var(--accent); }
+    .setting-row .value-display { width: 28px; text-align: right; color: var(--text-on-surface-alt); font-variant-numeric: tabular-nums; font-size: 0.75rem; }
 
     .sound-select-row {
       display: flex;
@@ -228,11 +332,11 @@
       align-items: center;
       font-size: 0.78rem;
     }
-    .sound-select-row label { color: #888; }
+    .sound-select-row label { color: var(--text-setting); }
     .sound-select-row select {
-      background: #222;
-      color: #ccc;
-      border: 1px solid #333;
+      background: var(--bg-input);
+      color: var(--text-on-surface);
+      border: 1px solid var(--border-tertiary);
       border-radius: 6px;
       padding: 4px 8px;
       font-size: 0.75rem;
@@ -248,7 +352,7 @@
       padding: 3px 7px;
       border-radius: 20px;
       background: transparent;
-      color: #666;
+      color: var(--text-muted);
       white-space: nowrap;
       display: flex;
       align-items: center;
@@ -277,8 +381,8 @@
       width: 180px;
       border-radius: 16px;
       overflow: hidden;
-      border: 3px solid #2a2a3a;
-      box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4);
+      border: 3px solid var(--border-secondary);
+      box-shadow: 0 8px 40px var(--shadow-meter);
       flex-shrink: 0;
     }
 
@@ -292,24 +396,24 @@
       text-transform: uppercase;
       letter-spacing: 1.5px;
       transition: background 0.25s ease, box-shadow 0.25s ease, color 0.25s ease;
-      color: #444;
+      color: var(--text-dim);
       position: relative;
     }
 
     .level-zone-veryloud {
-      background: #1a0d0d;
-      border-bottom: 1px solid #2a2a3a;
+      background: var(--bg-zone-veryloud);
+      border-bottom: 1px solid var(--border-secondary);
     }
     .level-zone-loud {
-      background: #1a1010;
-      border-bottom: 1px solid #2a2a3a;
+      background: var(--bg-zone-loud);
+      border-bottom: 1px solid var(--border-secondary);
     }
     .level-zone-talking {
-      background: #1a1a0d;
-      border-bottom: 1px solid #2a2a3a;
+      background: var(--bg-zone-talking);
+      border-bottom: 1px solid var(--border-secondary);
     }
     .level-zone-quiet {
-      background: #0d1a12;
+      background: var(--bg-zone-quiet);
     }
 
     .level-zone-veryloud.active {
@@ -336,7 +440,7 @@
     .meter-bar-bg {
       width: 120px;
       height: 6px;
-      background: #2a2a3a;
+      background: var(--border-secondary);
       border-radius: 3px;
       overflow: hidden;
       margin-top: 20px;
@@ -354,7 +458,7 @@
       font-size: 1.1rem;
       font-weight: 700;
       font-variant-numeric: tabular-nums;
-      color: #ccc;
+      color: var(--text-on-surface);
     }
 
     .level-label {
@@ -362,7 +466,7 @@
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 2px;
-      color: #666;
+      color: var(--text-muted);
       margin-top: 2px;
     }
 
@@ -386,20 +490,20 @@
     .status-text {
       margin-top: 10px;
       font-size: 0.7rem;
-      color: #555;
+      color: var(--text-dim);
       text-align: center;
     }
 
     /* -- Right column -- */
     .monitor-right-panel {
       padding: 24px 0 24px 24px;
-      border-left: 1px solid #222;
+      border-left: 1px solid var(--border-primary);
       min-height: 100%;
     }
 
     .stats-panel {
-      background: #16161e;
-      border: 1px solid #2a2a3a;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-secondary);
       border-radius: 14px;
       padding: 20px;
     }
@@ -407,7 +511,7 @@
       font-size: 0.72rem;
       text-transform: uppercase;
       letter-spacing: 1.5px;
-      color: #666;
+      color: var(--text-muted);
       margin-bottom: 16px;
       text-align: center;
     }
@@ -419,25 +523,25 @@
       margin-bottom: 18px;
     }
     .stat-card {
-      background: #1a1a24;
+      background: var(--bg-surface-alt);
       border-radius: 10px;
       padding: 12px 10px;
       text-align: center;
     }
     .stat-icon {
       font-size: 0.7rem;
-      color: #555;
+      color: var(--text-dim);
       margin-bottom: 2px;
     }
     .stat-value {
       font-size: 1.3rem;
       font-weight: 800;
       font-variant-numeric: tabular-nums;
-      color: #fff;
+      color: var(--text-bright);
     }
     .stat-label {
       font-size: 0.6rem;
-      color: #666;
+      color: var(--text-muted);
       margin-top: 2px;
       text-transform: uppercase;
       letter-spacing: 0.5px;
@@ -447,7 +551,7 @@
       font-size: 0.68rem;
       text-transform: uppercase;
       letter-spacing: 1px;
-      color: #666;
+      color: var(--text-muted);
       margin-bottom: 10px;
       text-align: center;
       font-weight: 600;
@@ -455,33 +559,42 @@
 
     .zone-bars { display: flex; flex-direction: column; gap: 6px; }
     .zone-bar-row { display: flex; align-items: center; gap: 8px; font-size: 0.72rem; }
-    .zone-label { width: 65px; color: #888; text-align: right; flex-shrink: 0; }
-    .zone-bar-bg { flex: 1; height: 10px; background: #222; border-radius: 5px; overflow: hidden; }
+    .zone-label { width: 65px; color: var(--text-setting); text-align: right; flex-shrink: 0; }
+    .zone-bar-bg { flex: 1; height: 10px; background: var(--bg-input); border-radius: 5px; overflow: hidden; }
     .zone-bar-fill { height: 100%; border-radius: 5px; transition: width 0.3s ease; width: 0%; }
     .zone-green { background: #00e640; }
     .zone-yellow { background: #ffd600; }
     .zone-red { background: #ff6b35; }
     .zone-veryloud { background: #ff1a1a; }
-    .zone-percent { width: 32px; text-align: right; color: #aaa; font-variant-numeric: tabular-nums; flex-shrink: 0; }
+    .zone-percent { width: 32px; text-align: right; color: var(--text-secondary); font-variant-numeric: tabular-nums; flex-shrink: 0; }
 
     /* ===== DATA TAB ===== */
     .data-tab-content {
       padding: 24px;
-      background: #1a1a24;
+      background: var(--bg-surface-alt);
     }
 
     .chart-panel {
-      background: #16161e;
-      border: 1px solid #2a2a3a;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-secondary);
       border-radius: 14px;
       padding: 20px;
       margin-bottom: 20px;
+    }
+    .chart-heading {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .chart-heading h2 {
+      margin-bottom: 0;
     }
     .chart-panel h2 {
       font-size: 0.75rem;
       text-transform: uppercase;
       letter-spacing: 1px;
-      color: #666;
+      color: var(--text-muted);
       margin-bottom: 12px;
     }
     .chart-canvas-wrap canvas { width: 100%; height: 260px; border-radius: 8px; display: block; }
@@ -492,7 +605,7 @@
       margin-top: 10px;
       flex-wrap: wrap;
     }
-    .legend-item { display: flex; align-items: center; gap: 5px; font-size: 0.68rem; color: #666; }
+    .legend-item { display: flex; align-items: center; gap: 5px; font-size: 0.68rem; color: var(--text-muted); }
     .legend-color { display: inline-block; width: 8px; height: 8px; border-radius: 2px; }
 
     .data-bottom-grid {
@@ -502,8 +615,8 @@
     }
 
     .event-log-panel {
-      background: #16161e;
-      border: 1px solid #2a2a3a;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-secondary);
       border-radius: 14px;
       padding: 20px;
     }
@@ -511,30 +624,30 @@
       font-size: 0.75rem;
       text-transform: uppercase;
       letter-spacing: 1px;
-      color: #666;
+      color: var(--text-muted);
       margin-bottom: 12px;
     }
 
     .event-log { max-height: 200px; overflow-y: auto; font-size: 0.75rem; }
-    .event-log .no-events { color: #444; text-align: center; padding: 16px; }
+    .event-log .no-events { color: var(--text-dim); text-align: center; padding: 16px; }
     .event-entry {
       display: flex;
       justify-content: space-between;
       align-items: center;
       padding: 8px 10px;
-      background: #1a1a24;
+      background: var(--bg-surface-alt);
       border-radius: 8px;
       margin-bottom: 4px;
       gap: 8px;
     }
-    .event-entry .event-time { color: #666; font-variant-numeric: tabular-nums; }
+    .event-entry .event-time { color: var(--text-muted); font-variant-numeric: tabular-nums; }
     .event-entry .event-vol { color: #ff6b6b; font-weight: 600; }
     .event-entry .event-quiet { color: #69db7c; font-weight: 600; }
     .event-entry .event-pending { color: #ffd43b; font-style: italic; }
 
     .history-panel {
-      background: #16161e;
-      border: 1px solid #2a2a3a;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-secondary);
       border-radius: 14px;
       padding: 20px;
     }
@@ -542,7 +655,7 @@
       font-size: 0.75rem;
       text-transform: uppercase;
       letter-spacing: 1px;
-      color: #666;
+      color: var(--text-muted);
       margin-bottom: 12px;
     }
 
@@ -552,7 +665,7 @@
       margin-bottom: 12px;
     }
     .btn-export {
-      background: #2d6a4f;
+      background: var(--accent);
       color: white;
       padding: 8px 16px;
       font-size: 0.75rem;
@@ -561,10 +674,10 @@
       border-radius: 8px;
       cursor: pointer;
     }
-    .btn-export:hover { background: #3a8563; }
+    .btn-export:hover { background: var(--accent-hover); }
     .btn-clear-data {
-      background: #2a2a3a;
-      color: #999;
+      background: var(--bg-btn-clear);
+      color: var(--text-setting-alt);
       padding: 8px 16px;
       font-size: 0.75rem;
       font-weight: 600;
@@ -572,13 +685,13 @@
       border-radius: 8px;
       cursor: pointer;
     }
-    .btn-clear-data:hover { background: #333; color: #ccc; }
+    .btn-clear-data:hover { background: var(--bg-btn-clear-hover); color: var(--text-on-surface); }
 
     .history-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
     .history-table { width: 100%; border-collapse: collapse; font-size: 0.72rem; }
     .history-table th {
-      background: #1a1a24;
-      color: #666;
+      background: var(--bg-surface-alt);
+      color: var(--text-muted);
       padding: 8px;
       text-align: left;
       font-weight: 600;
@@ -589,16 +702,16 @@
     }
     .history-table td {
       padding: 7px 8px;
-      border-bottom: 1px solid #222;
-      color: #aaa;
+      border-bottom: 1px solid var(--border-primary);
+      color: var(--text-secondary);
       font-variant-numeric: tabular-nums;
       white-space: nowrap;
     }
-    .history-table tr:hover td { background: #1e1e28; }
-    .history-empty { text-align: center; color: #444; padding: 20px; font-size: 0.8rem; }
+    .history-table tr:hover td { background: var(--bg-hover-row); }
+    .history-empty { text-align: center; color: var(--text-dim); padding: 20px; font-size: 0.8rem; }
 
     .btn-delete-session {
-      background: none; border: none; color: #555;
+      background: none; border: none; color: var(--text-dim);
       cursor: pointer; font-size: 0.8rem; padding: 2px 6px; border-radius: 4px;
     }
     .btn-delete-session:hover { color: #ff6b6b; background: rgba(255,107,107,0.1); }
@@ -606,8 +719,8 @@
     /* Mobile card layout for history */
     .history-cards { display: none; }
     .history-card {
-      background: #1a1a24;
-      border: 1px solid #2a2a3a;
+      background: var(--bg-surface-alt);
+      border: 1px solid var(--border-secondary);
       border-radius: 12px;
       padding: 14px 16px;
       margin-bottom: 10px;
@@ -622,11 +735,11 @@
     .history-card-date {
       font-size: 0.82rem;
       font-weight: 700;
-      color: #ddd;
+      color: var(--text-on-surface);
     }
     .history-card-time {
       font-size: 0.72rem;
-      color: #666;
+      color: var(--text-muted);
       margin-left: 8px;
       font-weight: 400;
     }
@@ -642,13 +755,13 @@
     }
     .history-card-stat-label {
       font-size: 0.6rem;
-      color: #666;
+      color: var(--text-muted);
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
     .history-card-stat-value {
       font-size: 0.82rem;
-      color: #bbb;
+      color: var(--text-on-surface-alt);
       font-variant-numeric: tabular-nums;
       font-weight: 600;
     }
@@ -657,7 +770,7 @@
       gap: 8px;
       margin-top: 10px;
       padding-top: 10px;
-      border-top: 1px solid #2a2a3a;
+      border-top: 1px solid var(--border-secondary);
       flex-wrap: wrap;
     }
     .history-card-zone {
@@ -665,7 +778,7 @@
       align-items: center;
       gap: 4px;
       font-size: 0.68rem;
-      color: #888;
+      color: var(--text-setting);
     }
     .history-card-zone-dot {
       width: 8px; height: 8px; border-radius: 50%; display: inline-block;
@@ -678,7 +791,7 @@
 
     /* ===== ABOUT PAGE ===== */
     .about-page {
-      background: #1a1a24;
+      background: var(--bg-surface-alt);
       padding: 40px 24px 60px;
       display: flex;
       justify-content: center;
@@ -687,8 +800,8 @@
     }
 
     .about-card {
-      background: #16161e;
-      border: 1px solid #2a2a3a;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-secondary);
       border-radius: 20px;
       padding: 40px 44px;
       max-width: 560px;
@@ -704,13 +817,13 @@
     .about-title {
       font-size: 1.6rem;
       font-weight: 800;
-      color: #fff;
+      color: var(--text-bright);
       margin-bottom: 4px;
     }
 
     .about-byline {
       font-size: 0.82rem;
-      color: #2d6a4f;
+      color: var(--accent);
       font-weight: 600;
       margin-bottom: 20px;
     }
@@ -718,7 +831,7 @@
     .about-divider {
       width: 50px;
       height: 3px;
-      background: #2d6a4f;
+      background: var(--accent);
       border-radius: 2px;
       margin: 0 auto 24px;
     }
@@ -733,17 +846,17 @@
     .about-body p {
       font-size: 0.92rem;
       line-height: 1.65;
-      color: #bbb;
+      color: var(--text-on-surface-alt);
     }
 
     .about-hypothesis {
-      background: #1a2e24;
-      border-left: 4px solid #2d6a4f;
+      background: var(--accent-bg);
+      border-left: 4px solid var(--accent);
       border-radius: 0 10px 10px 0;
       padding: 16px 20px;
       font-size: 0.95rem;
       line-height: 1.6;
-      color: #ccc;
+      color: var(--text-on-surface);
       font-style: italic;
     }
 
@@ -753,14 +866,14 @@
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 1.5px;
-      color: #69db7c;
+      color: var(--accent-text);
       font-style: normal;
       margin-bottom: 6px;
     }
 
     .about-ai-note {
-      background: #1a1a24;
-      border: 1px solid #2a2a3a;
+      background: var(--bg-surface-alt);
+      border: 1px solid var(--border-secondary);
       border-radius: 10px;
       padding: 14px 18px;
       display: flex;
@@ -775,13 +888,13 @@
     }
     .about-ai-note p {
       font-size: 0.82rem !important;
-      color: #888 !important;
+      color: var(--text-setting) !important;
       line-height: 1.55;
     }
 
     .about-start-btn {
       margin-top: 28px;
-      background: #2d6a4f;
+      background: var(--accent);
       color: white;
       border: none;
       padding: 14px 36px;
@@ -791,7 +904,7 @@
       cursor: pointer;
       transition: all 0.2s;
     }
-    .about-start-btn:hover { background: #3a8563; transform: translateY(-1px); }
+    .about-start-btn:hover { background: var(--accent-hover); transform: translateY(-1px); }
 
     /* ===== FULLSCREEN / PROJECTOR MODE ===== */
     .fullscreen-exit-btn {
@@ -848,7 +961,7 @@
         padding: 16px;
       }
       .monitor-left { padding: 0 0 16px 0; }
-      .monitor-right-panel { padding: 16px 0 0 0; border-left: none; border-top: 1px solid #222; }
+      .monitor-right-panel { padding: 16px 0 0 0; border-left: none; border-top: 1px solid var(--border-primary); }
       .data-bottom-grid { grid-template-columns: 1fr; }
       .data-tab-content { padding: 16px; }
     }
@@ -885,7 +998,13 @@
         <div class="top-bar-subtitle">Built by Alexander and Dad</div>
       </div>
     </div>
-    <button class="btn-fullscreen" id="btnFullscreen">&#x26F6; Projector Mode</button>
+    <div class="top-bar-right">
+      <button class="btn-theme-toggle" id="btnThemeToggle" title="Toggle light/dark mode">
+        <span class="icon-moon">&#x1F319;</span>
+        <span class="icon-sun">&#x2600;&#xFE0F;</span>
+      </button>
+      <button class="btn-fullscreen" id="btnFullscreen">&#x26F6; Projector Mode</button>
+    </div>
   </div>
 
   <!-- Tab Navigation -->
@@ -929,7 +1048,7 @@
       <!-- Left: Controls -->
       <div class="monitor-left hide-fs">
         <button class="btn-record-big" id="btnRecord">
-          <span class="mic-icon">&#x1F3A4;</span> Start Recording
+          <span class="mic-icon">&#x1F3A4;</span> Start Listening
         </button>
         <button class="btn-stop-big" id="btnStop">&#x25A0; Stop Recording</button>
 
@@ -937,14 +1056,14 @@
           <h3>Alert Triggers At</h3>
           <div class="range-buttons" id="rangeButtons">
             <button class="range-btn" data-db="50">Quiet<span>50 dB</span></button>
-            <button class="range-btn" data-db="60">Talking<span>60 dB</span></button>
-            <button class="range-btn active" data-db="70">Loud<span>70 dB</span></button>
+            <button class="range-btn active" data-db="60">Talking<span>60 dB</span></button>
+            <button class="range-btn" data-db="70">Loud<span>70 dB</span></button>
             <button class="range-btn" data-db="85">Very Loud<span>85 dB</span></button>
           </div>
         </div>
 
-        <details class="more-settings">
-          <summary>&#x2699; More Settings</summary>
+        <div class="more-settings">
+          <h3>More Settings</h3>
           <div class="more-settings-content">
             <div class="setting-row">
               <label>After</label>
@@ -965,7 +1084,7 @@
               </select>
             </div>
           </div>
-        </details>
+        </div>
 
         <div class="db-reference">
           <div class="db-ref-item"><span class="db-ref-dot" style="background:#00e640"></span> &lt;50 dB Quiet</div>
@@ -987,7 +1106,7 @@
         <div class="volume-value" id="volumeValue">--</div>
         <div class="level-label" id="levelLabel">Ready</div>
         <div class="buzzer-indicator" id="buzzerIndicator">BUZZER ACTIVE</div>
-        <p class="status-text" id="statusText">Click Start Recording to begin</p>
+        <p class="status-text" id="statusText">Click Start Listening to begin</p>
       </div>
 
       <!-- Right: Stats -->
@@ -1048,7 +1167,10 @@
   <div class="tab-content" id="tab-data">
     <div class="data-tab-content">
       <div class="chart-panel">
-        <h2>Noise Level Over Time</h2>
+        <div class="chart-heading">
+          <h2>Noise Level Over Time</h2>
+          <button class="btn-export" id="btnSaveGraph">Save Graph as Image</button>
+        </div>
         <div class="chart-canvas-wrap">
           <canvas id="chartCanvas" width="1400" height="440"></canvas>
         </div>
@@ -1084,6 +1206,31 @@
   <button class="fullscreen-exit-btn" id="btnExitFs">Exit Fullscreen</button>
 
   <script>
+    // ===== THEME TOGGLE =====
+    function cssVar(name) {
+      return getComputedStyle(document.body).getPropertyValue('--' + name).trim();
+    }
+
+    function resetBodyClasses() {
+      const keep = [];
+      if (document.body.classList.contains('light-mode')) keep.push('light-mode');
+      if (document.body.classList.contains('fs-active')) keep.push('fs-active');
+      document.body.className = keep.join(' ');
+    }
+
+    (function initTheme() {
+      if (localStorage.getItem('themeMode') === 'light') {
+        document.body.classList.add('light-mode');
+      }
+    })();
+
+    document.getElementById('btnThemeToggle').addEventListener('click', () => {
+      document.body.classList.toggle('light-mode');
+      const isLight = document.body.classList.contains('light-mode');
+      localStorage.setItem('themeMode', isLight ? 'light' : 'dark');
+      drawChart();
+    });
+
     // ===== TAB SWITCHING =====
     document.querySelectorAll('.tab-btn').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -1122,6 +1269,7 @@
     const buzzerDurationSlider = $('buzzerDuration');
     const buzzerDurationVal = $('buzzerDurationVal');
     const btnExport = $('btnExport');
+    const btnSaveGraph = $('btnSaveGraph');
     const btnClearData = $('btnClearData');
     const btnFullscreen = $('btnFullscreen');
     const btnExitFs = $('btnExitFs');
@@ -1134,6 +1282,8 @@
     let microphone = null;
     let stream = null;
     let animationId = null;
+    let dataIntervalId = null;
+    let lastVolume = 30;
     let isRecording = false;
 
     let buzzerActive = false;
@@ -1150,8 +1300,8 @@
 
     const MIN_DB = 30;
     const MAX_DB = 100;
-    let redThreshold = 70;        // dB
-    let yellowThreshold = 60;     // auto-calculated
+    let redThreshold = 60;        // dB
+    let yellowThreshold = 50;     // auto-calculated
     let triggerDelaySec = 2;
     let buzzerDurationSec = 3;
     let redZoneStart = null;
@@ -1307,6 +1457,7 @@
     btnRecord.addEventListener('click', startRecording);
     btnStop.addEventListener('click', stopRecording);
     btnExport.addEventListener('click', exportCSV);
+    btnSaveGraph.addEventListener('click', saveGraphAsImage);
     btnClearData.addEventListener('click', clearAllData);
 
     async function startRecording() {
@@ -1341,7 +1492,8 @@
         smoothedVolume = MIN_DB;
         resetEventLog();
 
-        monitorVolume();
+        dataIntervalId = setInterval(collectData, 200);
+        renderLoop();
       } catch (err) {
         statusText.textContent = 'Microphone access denied. Please allow mic access.';
       }
@@ -1349,6 +1501,7 @@
 
     function stopRecording() {
       isRecording = false;
+      if (dataIntervalId) { clearInterval(dataIntervalId); dataIntervalId = null; }
       if (animationId) { cancelAnimationFrame(animationId); animationId = null; }
       forceStopBuzzer();
 
@@ -1359,17 +1512,17 @@
 
       btnRecord.disabled = false;
       btnRecord.classList.remove('recording');
-      btnRecord.innerHTML = '<span class="mic-icon">&#x1F3A4;</span> Start Recording';
+      btnRecord.innerHTML = '<span class="mic-icon">&#x1F3A4;</span> Start Listening';
       btnStop.classList.remove('visible');
       clearLights();
       meterFill.style.width = '0%';
       meterFill.style.background = '#00e640';
       volumeValue.textContent = '--';
       levelLabel.textContent = 'Stopped';
-      levelLabel.style.color = '#666';
+      levelLabel.style.color = cssVar('text-muted');
       buzzerIndicator.classList.remove('active');
-      document.body.className = document.body.classList.contains('fs-active') ? 'fs-active' : '';
-      statusText.textContent = 'Session saved. Click Start Recording to begin again.';
+      resetBodyClasses();
+      statusText.textContent = 'Session saved. Click Start Listening to begin again.';
       rangeButtons.forEach(b => { b.style.pointerEvents = ''; b.style.opacity = ''; });
 
       updateStats();
@@ -1377,26 +1530,17 @@
       renderHistory();
     }
 
-    // ===== MONITOR LOOP =====
-    function monitorVolume() {
+    // ===== DATA COLLECTION (runs via setInterval, survives background tabs) =====
+    function collectData() {
       if (!isRecording) return;
       const now = Date.now();
 
       if (buzzerActive) {
-        // Mic is disconnected — just show buzzer UI, don't fake levels
-        clearLights();
-        document.body.className = (document.body.classList.contains('fs-active') ? 'fs-active ' : '') + 'level-red';
-        levelLabel.textContent = 'BUZZER';
-        levelLabel.style.color = '#e63946';
-        volumeValue.textContent = '🔔';
-        meterFill.style.width = '0%';
-
         if (now - lastSampleTime >= SAMPLE_INTERVAL) {
           lastSampleTime = now;
           trackZoneTime('red', now);
           updateStats();
         }
-        animationId = requestAnimationFrame(monitorVolume);
         return;
       }
 
@@ -1412,17 +1556,33 @@
       const rawDb = rms > 0.0001 ? Math.max(MIN_DB, Math.min(MAX_DB, 85 + 20 * Math.log10(rms))) : MIN_DB;
       if (rawDb > peakVolume) peakVolume = rawDb;
       smoothedVolume = smoothedVolume + SMOOTH_FACTOR * (rawDb - smoothedVolume);
-      const vol = Math.round(smoothedVolume);
+      lastVolume = Math.round(smoothedVolume);
 
       if (now - lastSampleTime >= SAMPLE_INTERVAL) {
-        dataPoints.push({ time: now, volume: vol });
+        dataPoints.push({ time: now, volume: lastVolume });
         lastSampleTime = now;
         drawChart();
         updateStats();
       }
 
-      updateUI(vol);
-      animationId = requestAnimationFrame(monitorVolume);
+      updateUI(lastVolume);
+    }
+
+    // ===== UI RENDER LOOP (requestAnimationFrame, pauses in background — that's fine) =====
+    function renderLoop() {
+      if (!isRecording) return;
+      if (buzzerActive) {
+        clearLights();
+        resetBodyClasses();
+        document.body.classList.add('level-red');
+        levelLabel.textContent = 'BUZZER';
+        levelLabel.style.color = '#e63946';
+        volumeValue.textContent = '🔔';
+        meterFill.style.width = '0%';
+      } else {
+        updateUI(lastVolume);
+      }
+      animationId = requestAnimationFrame(renderLoop);
     }
 
     // ===== UI UPDATE =====
@@ -1437,7 +1597,7 @@
       }
       const percent = db;  // thresholds are now in dB
       clearLights();
-      document.body.className = document.body.classList.contains('fs-active') ? 'fs-active' : '';
+      resetBodyClasses();
 
       // During cooldown after buzzer, don't allow re-trigger
       // Reset redZoneStart so trigger delay restarts fresh after cooldown
@@ -1609,7 +1769,7 @@
       const H = chartCanvas.height;
       chartCtx.clearRect(0, 0, W, H);
 
-      chartCtx.fillStyle = '#111118';
+      chartCtx.fillStyle = cssVar('bg-body');
       chartCtx.fillRect(0, 0, W, H);
 
       // Map dB to chart Y position
@@ -1619,13 +1779,14 @@
       const vlY = dbToY(VERYLOUD_THRESHOLD);
 
       // 4 zone background bands
-      chartCtx.fillStyle = 'rgba(0,230,64,0.06)';
+      const za = parseFloat(cssVar('chart-zone-alpha'));
+      chartCtx.fillStyle = `rgba(0,230,64,${za})`;
       chartCtx.fillRect(0, yY, W, H - yY);
-      chartCtx.fillStyle = 'rgba(255,214,0,0.06)';
+      chartCtx.fillStyle = `rgba(255,214,0,${za})`;
       chartCtx.fillRect(0, rY, W, yY - rY);
-      chartCtx.fillStyle = 'rgba(255,107,53,0.06)';
+      chartCtx.fillStyle = `rgba(255,107,53,${za})`;
       chartCtx.fillRect(0, vlY, W, rY - vlY);
-      chartCtx.fillStyle = 'rgba(255,26,26,0.06)';
+      chartCtx.fillStyle = `rgba(255,26,26,${za})`;
       chartCtx.fillRect(0, 0, W, vlY);
 
       // Threshold lines with friendly labels
@@ -1650,7 +1811,7 @@
       chartCtx.setLineDash([]);
 
       if (dataPoints.length < 2) {
-        chartCtx.fillStyle = '#444';
+        chartCtx.fillStyle = cssVar('text-dim');
         chartCtx.font = '28px sans-serif';
         chartCtx.textAlign = 'center';
         chartCtx.fillText('Start recording to see data', W / 2, H / 2);
@@ -1669,7 +1830,8 @@
         const x1 = Math.max(0, ((evt.startTime - firstTime) / timeSpan) * W);
         const x2 = Math.min(W, ((endT - firstTime) / timeSpan) * W);
         if (x2 > 0 && x1 < W) {
-          chartCtx.fillStyle = 'rgba(255,26,26,0.18)';
+          const ba = parseFloat(cssVar('chart-buzzer-alpha'));
+          chartCtx.fillStyle = `rgba(255,26,26,${ba})`;
           chartCtx.fillRect(x1, 0, Math.max(x2 - x1, 3), H);
           chartCtx.fillStyle = 'rgba(255,100,100,0.7)';
           chartCtx.font = 'bold 18px sans-serif';
@@ -1699,7 +1861,7 @@
       for (let d = MIN_DB; d <= MAX_DB; d += 10) {
         const y = dbToY(d);
         let label = d + ' dB';
-        let color = '#555';
+        let color = cssVar('text-dim');
         if (d === yellowThreshold) { label = 'Talking (' + d + ' dB)'; color = 'rgba(255,214,0,0.6)'; }
         else if (d === redThreshold) { label = 'Loud (' + d + ' dB)'; color = 'rgba(255,107,53,0.6)'; }
         else if (d === VERYLOUD_THRESHOLD) { label = 'V. Loud (' + d + ' dB)'; color = 'rgba(255,26,26,0.6)'; }
@@ -1715,7 +1877,7 @@
       }
 
       // X-axis time labels (actual clock time)
-      chartCtx.fillStyle = '#444';
+      chartCtx.fillStyle = cssVar('text-dim');
       chartCtx.font = '20px sans-serif';
       chartCtx.textAlign = 'center';
       const totalSecs = Math.ceil(timeSpan / 1000);
@@ -1908,6 +2070,15 @@
     }
 
     // ===== CSV EXPORT =====
+    function saveGraphAsImage() {
+      const dataURL = chartCanvas.toDataURL('image/jpeg', 0.95);
+      const date = new Date().toISOString().slice(0, 10);
+      const a = document.createElement('a');
+      a.href = dataURL;
+      a.download = `noise-graph-${date}.jpg`;
+      a.click();
+    }
+
     function exportCSV() {
       const sessions = loadSaved();
       if (sessions.length === 0) { alert('No saved data to export.'); return; }
