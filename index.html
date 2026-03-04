@@ -1050,7 +1050,7 @@
         <button class="btn-record-big" id="btnRecord">
           <span class="mic-icon">&#x1F3A4;</span> Start Listening
         </button>
-        <button class="btn-stop-big" id="btnStop">&#x25A0; Stop Recording</button>
+        <button class="btn-stop-big" id="btnStop">&#x25A0; Stop Listening</button>
 
         <div class="alert-section">
           <h3>Alert Triggers At</h3>
@@ -1086,11 +1086,11 @@
           </div>
         </div>
 
-        <div class="db-reference">
-          <div class="db-ref-item"><span class="db-ref-dot" style="background:#00e640"></span> &lt;50 dB Quiet</div>
-          <div class="db-ref-item"><span class="db-ref-dot" style="background:#ffd600"></span> 50-70 dB Talking</div>
-          <div class="db-ref-item"><span class="db-ref-dot" style="background:#ff6b35"></span> 70-85 dB Loud</div>
-          <div class="db-ref-item"><span class="db-ref-dot" style="background:#ff1a1a"></span> 85+ dB Very Loud</div>
+        <div class="db-reference" id="dbReference">
+          <div class="db-ref-item"><span class="db-ref-dot" style="background:#00e640"></span> <span id="refQuiet">&lt;60 dB Quiet</span></div>
+          <div class="db-ref-item"><span class="db-ref-dot" style="background:#ffd600"></span> <span id="refTalking">60-70 dB Talking</span></div>
+          <div class="db-ref-item"><span class="db-ref-dot" style="background:#ff6b35"></span> <span id="refLoud">70-85 dB Loud</span></div>
+          <div class="db-ref-item"><span class="db-ref-dot" style="background:#ff1a1a"></span> <span id="refVeryLoud">85+ dB Very Loud</span></div>
         </div>
       </div>
 
@@ -1300,8 +1300,8 @@
 
     const MIN_DB = 30;
     const MAX_DB = 100;
-    let redThreshold = 60;        // dB
-    let yellowThreshold = 50;     // auto-calculated
+    let yellowThreshold = 60;    // alert trigger level (Talking starts here)
+    let redThreshold = 70;       // Loud zone start
     let triggerDelaySec = 2;
     let buzzerDurationSec = 3;
     let redZoneStart = null;
@@ -1435,13 +1435,26 @@
     });
 
     // ===== SETTINGS =====
+    function updateDbReference() {
+      $('refQuiet').textContent = '<' + yellowThreshold + ' dB Quiet';
+      $('refTalking').textContent = yellowThreshold + '-' + redThreshold + ' dB Talking';
+      if (redThreshold >= 85) {
+        $('refLoud').parentElement.style.display = 'none';
+      } else {
+        $('refLoud').parentElement.style.display = '';
+        $('refLoud').textContent = redThreshold + '-85 dB Loud';
+      }
+      $('refVeryLoud').textContent = '85+ dB Very Loud';
+    }
+
     rangeButtons.forEach(btn => {
       btn.addEventListener('click', () => {
         if (isRecording) return;
         rangeButtons.forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
-        redThreshold = parseInt(btn.dataset.db);
-        yellowThreshold = redThreshold - 10;
+        yellowThreshold = parseInt(btn.dataset.db);
+        redThreshold = Math.min(yellowThreshold + 10, 85);
+        updateDbReference();
       });
     });
     triggerDelaySlider.addEventListener('input', () => {
@@ -1474,7 +1487,7 @@
         isRecording = true;
         btnRecord.disabled = true;
         btnRecord.classList.add('recording');
-        btnRecord.innerHTML = '<span class="mic-icon">&#x1F534;</span> Recording...';
+        btnRecord.innerHTML = '<span class="mic-icon">&#x1F534;</span> Listening...';
         btnStop.classList.add('visible');
         statusText.textContent = 'Monitoring noise — buzzer will sound when too loud';
         rangeButtons.forEach(b => { b.style.pointerEvents = 'none'; b.style.opacity = '0.5'; });
@@ -1652,34 +1665,46 @@
           levelLabel.textContent = 'Warning... ' + rem + 's';
           levelLabel.style.color = '#ff6b35';
         }
+      } else if (percent >= yellowThreshold) {
+        // Talking zone — alert trigger level
+        if (!inCooldown && redZoneStart === null) redZoneStart = Date.now();
+        const redDur = redZoneStart ? (Date.now() - redZoneStart) / 1000 : 0;
+
+        zoneQuiet.classList.add('active');
+        zoneTalking.classList.add('active');
+        meterFill.style.background = '#ffd600';
+        document.body.classList.add('level-yellow');
+        trackZoneTime('yellow', now);
+
+        if (!inCooldown && redDur >= triggerDelaySec) {
+          levelLabel.textContent = 'Too Loud!';
+          levelLabel.style.color = '#ffd600';
+          startBuzzer();
+        } else if (inCooldown) {
+          levelLabel.textContent = 'Cooling down...';
+          levelLabel.style.color = '#ffd600';
+        } else {
+          const rem = Math.ceil(triggerDelaySec - redDur);
+          levelLabel.textContent = 'Warning... ' + rem + 's';
+          levelLabel.style.color = '#ffd600';
+        }
       } else {
         redZoneStart = null;
 
-        if (percent >= yellowThreshold) {
-          // Talking zone
-          zoneQuiet.classList.add('active');
-          zoneTalking.classList.add('active');
-          meterFill.style.background = '#ffd600';
-          levelLabel.textContent = 'Talking';
-          levelLabel.style.color = '#ffd600';
-          document.body.classList.add('level-yellow');
-          trackZoneTime('yellow', now);
-        } else {
-          // Quiet zone
-          zoneQuiet.classList.add('active');
-          meterFill.style.background = '#00e640';
-          levelLabel.textContent = 'Quiet';
-          levelLabel.style.color = '#00e640';
-          document.body.classList.add('level-green');
-          trackZoneTime('green', now);
+        // Quiet zone
+        zoneQuiet.classList.add('active');
+        meterFill.style.background = '#00e640';
+        levelLabel.textContent = 'Quiet';
+        levelLabel.style.color = '#00e640';
+        document.body.classList.add('level-green');
+        trackZoneTime('green', now);
 
-          // Quiet-down tracking
-          if (waitingForQuietDown && quietDownWatchEvent) {
-            quietDownWatchEvent.quietDownTime = (Date.now() - quietDownWatchEvent.endTime) / 1000;
-            waitingForQuietDown = false;
-            quietDownWatchEvent = null;
-            updateEventLog();
-          }
+        // Quiet-down tracking
+        if (waitingForQuietDown && quietDownWatchEvent) {
+          quietDownWatchEvent.quietDownTime = (Date.now() - quietDownWatchEvent.endTime) / 1000;
+          waitingForQuietDown = false;
+          quietDownWatchEvent = null;
+          updateEventLog();
         }
       }
     }
@@ -1799,22 +1824,24 @@
       chartCtx.fillStyle = 'rgba(255,214,0,0.5)';
       chartCtx.fillText('Talking (' + yellowThreshold + ' dB)', 8, yY - 6);
 
-      chartCtx.strokeStyle = 'rgba(255,107,53,0.4)';
-      chartCtx.beginPath(); chartCtx.moveTo(0, rY); chartCtx.lineTo(W, rY); chartCtx.stroke();
-      chartCtx.fillStyle = 'rgba(255,107,53,0.5)';
-      chartCtx.fillText('Loud (' + redThreshold + ' dB)', 8, rY - 6);
+      if (redThreshold < VERYLOUD_THRESHOLD) {
+        chartCtx.strokeStyle = 'rgba(255,107,53,0.4)';
+        chartCtx.beginPath(); chartCtx.moveTo(0, rY); chartCtx.lineTo(W, rY); chartCtx.stroke();
+        chartCtx.fillStyle = 'rgba(255,107,53,0.5)';
+        chartCtx.fillText('Loud (' + redThreshold + ' dB)', 8, rY - 6);
+      }
 
       chartCtx.strokeStyle = 'rgba(255,26,26,0.4)';
       chartCtx.beginPath(); chartCtx.moveTo(0, vlY); chartCtx.lineTo(W, vlY); chartCtx.stroke();
       chartCtx.fillStyle = 'rgba(255,26,26,0.5)';
-      chartCtx.fillText('Very Loud (85 dB)', 8, vlY - 6);
+      chartCtx.fillText('Very Loud (' + VERYLOUD_THRESHOLD + ' dB)', 8, vlY - 6);
       chartCtx.setLineDash([]);
 
       if (dataPoints.length < 2) {
         chartCtx.fillStyle = cssVar('text-dim');
         chartCtx.font = '28px sans-serif';
         chartCtx.textAlign = 'center';
-        chartCtx.fillText('Start recording to see data', W / 2, H / 2);
+        chartCtx.fillText('Start listening to see data', W / 2, H / 2);
         chartCtx.textAlign = 'start';
         return;
       }
@@ -1862,9 +1889,9 @@
         const y = dbToY(d);
         let label = d + ' dB';
         let color = cssVar('text-dim');
-        if (d === yellowThreshold) { label = 'Talking (' + d + ' dB)'; color = 'rgba(255,214,0,0.6)'; }
+        if (d === VERYLOUD_THRESHOLD) { label = 'V. Loud (' + d + ' dB)'; color = 'rgba(255,26,26,0.6)'; }
         else if (d === redThreshold) { label = 'Loud (' + d + ' dB)'; color = 'rgba(255,107,53,0.6)'; }
-        else if (d === VERYLOUD_THRESHOLD) { label = 'V. Loud (' + d + ' dB)'; color = 'rgba(255,26,26,0.6)'; }
+        else if (d === yellowThreshold) { label = 'Talking (' + d + ' dB)'; color = 'rgba(255,214,0,0.6)'; }
         chartCtx.fillStyle = color;
         chartCtx.fillText(label, W - 8, y + 5);
         if (d > MIN_DB && d < MAX_DB) {
